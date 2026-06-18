@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { AuthProvider } from "./context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "Confecciones Carmen - Intranet",
-  description: "Sistema de gestión interna para Confecciones Carmen",
+  title: "Confecciones Carmen",
+  description: "Especialistas en confección de trajes, vestidos y arreglos",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="es">
-      <body className={inter.className}>
-        {children}
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
