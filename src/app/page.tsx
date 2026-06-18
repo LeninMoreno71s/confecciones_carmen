@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Footer from "../../components/footer";
+import Header from "../../components/header";
 import Link from "next/link";
 import Carta from "../../components/carta_producto";
 import CartaPublicacion from "../../components/carta_publicacion";
@@ -27,6 +28,9 @@ export default function HomePage() {
 
   return (
     <main>
+      {/* HEADER CON NOMBRE DE USUARIO */}
+      <Header />
+
       {/* HERO SECTION */}
       <section
         style={{
@@ -38,18 +42,19 @@ export default function HomePage() {
           alignItems: "center",
           textAlign: "center",
           padding: "2rem",
+          paddingTop: "5rem",
           position: "relative",
           overflow: "hidden",
         }}
-        >
+      >
         {/* Logo centrado arriba */}
         <img
           src="/ConC alter version.png"
           alt="Logo Confecciones Carmen"
           style={{
-            maxWidth: "600px",   // límite máximo en pantallas grandes
-            width: "100%",       // ocupa todo el ancho disponible
-            height: "auto",      // mantiene proporción
+            maxWidth: "600px",
+            width: "100%",
+            height: "auto",
             marginBottom: "1rem",
           }}
         />
@@ -161,6 +166,28 @@ export default function HomePage() {
               👗 Ver Productos
             </Link>
 
+            {/* BOTÓN CREAR CUENTA */}
+            <Link
+              href="/registro"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.85rem 2rem",
+                background: "white",
+                color: "#8B3A4A",
+                border: "2px solid #8B3A4A",
+                borderRadius: "12px",
+                fontSize: "1rem",
+                fontWeight: 600,
+                textDecoration: "none",
+                transition: "transform 0.2s",
+              }}
+            >
+              ✨ Crear Cuenta
+            </Link>
+
+            {/* BOTÓN INICIAR SESIÓN */}
             <Link
               href="/login"
               style={{
@@ -243,19 +270,11 @@ export default function HomePage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
               gap: "2rem",
             }}
           >
-            {/* Aquí irán las tarjetas de productos */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-                gap: "2rem",
-              }}
-            >
-              <Carta
+            <Carta
               image="/oso_traje.webp"
               name="Traje Oso"
               descripcion="Traje completo de oso con detalles artesanales."
@@ -297,7 +316,6 @@ export default function HomePage() {
               costo={35000}
               stock={1}
             />
-            </div>
           </div>
         </div>
       </section>
@@ -344,7 +362,6 @@ export default function HomePage() {
               gap: "2rem",
             }}
           >
-            {/* Tarjeta de servicio */}
             <div
               style={{
                 background: "white",
@@ -363,7 +380,6 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Tarjeta de servicio */}
             <div
               style={{
                 background: "white",
@@ -382,7 +398,6 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Tarjeta de servicio */}
             <div
               style={{
                 background: "white",
@@ -417,7 +432,6 @@ export default function HomePage() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
-            {/* Renderizamos el componente reutilizable de la publicación pasándole sus props */}
             {publicacionesMock.map((pub) => (
               <CartaPublicacion 
                 key={pub.id} 
@@ -432,11 +446,11 @@ export default function HomePage() {
       {/* MODAL DE PUBLICACIÓN */}
       {selectedPub && (
         <div 
-          onClick={() => setSelectedPub(null)} // Cierra al hacer clic afuera
+          onClick={() => setSelectedPub(null)}
           style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
         >
           <div 
-            onClick={(e) => e.stopPropagation()} // Evita que se cierre al hacer clic adentro de la tarjeta blanca
+            onClick={(e) => e.stopPropagation()}
             style={{ background: "white", borderRadius: "12px", maxWidth: "600px", width: "100%", overflow: "hidden", position: "relative", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
           >
             <button 
@@ -460,7 +474,6 @@ export default function HomePage() {
       )}
 
       {/* FOOTER */}
-      
       <Footer />
 
       {/* Animación de rebote */}
