@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Footer from "../../components/footer";
 import Link from "next/link";
 import Carta from "../../components/carta_producto";
@@ -7,23 +7,34 @@ import CartaPublicacion from "../../components/carta_publicacion";
 
 export default function HomePage() {
   const [selectedPub, setSelectedPub] = useState<any>(null);
+  const [publicaciones, setPublicaciones] = useState<any[]>([]);
 
-  const publicacionesMock = [
-    {
-      id: 1,
-      imagen: "/oso_traje.webp",
-      titulo: "Nueva Colección de Disfraces",
-      fecha: "15/06/2026",
-      descripcion: "Estamos emocionados de anunciar nuestra nueva colección de disfraces para esta temporada. Hemos trabajado duro para traer los mejores diseños y materiales. ¡Ven a verlos! Tendremos promociones especiales para los primeros compradores."
-    },
-    {
-      id: 2,
-      imagen: "/traje_caporal.jpg",
-      titulo: "Taller de Costura Básica",
-      fecha: "10/06/2026",
-      descripcion: "El próximo mes abriremos un taller de costura básica para todos los interesados en aprender este hermoso arte. Las inscripciones ya están abiertas. No se requiere experiencia previa, solo ganas de aprender."
+  useEffect(() => {
+    // Intentamos cargar las publicaciones creadas por el admin desde el localStorage
+    const pubGuardadas = localStorage.getItem("publicaciones");
+    if (pubGuardadas && JSON.parse(pubGuardadas).length > 0) {
+      setPublicaciones(JSON.parse(pubGuardadas));
+    } else {
+      // Si no hay ninguna publicación real todavía, mostramos estas de ejemplo
+      const publicacionesMock = [
+        {
+          id: 1,
+          imagen: "/oso_traje.webp",
+          titulo: "Nueva Colección de Disfraces",
+          fecha: "15/06/2026",
+          descripcion: "Estamos emocionados de anunciar nuestra nueva colección de disfraces para esta temporada. Hemos trabajado duro para traer los mejores diseños y materiales. ¡Ven a verlos! Tendremos promociones especiales para los primeros compradores."
+        },
+        {
+          id: 2,
+          imagen: "/traje_caporal.jpg",
+          titulo: "Taller de Costura Básica",
+          fecha: "10/06/2026",
+          descripcion: "El próximo mes abriremos un taller de costura básica para todos los interesados en aprender este hermoso arte. Las inscripciones ya están abiertas. No se requiere experiencia previa, solo ganas de aprender."
+        }
+      ];
+      setPublicaciones(publicacionesMock);
     }
-  ];
+  }, []);
 
   return (
     <main>
@@ -417,14 +428,20 @@ export default function HomePage() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
-            {/* Renderizamos el componente reutilizable de la publicación pasándole sus props */}
-            {publicacionesMock.map((pub) => (
-              <CartaPublicacion 
-                key={pub.id} 
-                pub={pub} 
-                onClick={() => setSelectedPub(pub)} 
-              />
-            ))}
+            {/* Renderizamos el componente reutilizable mapeando el estado de publicaciones reales */}
+            {publicaciones.length > 0 ? (
+              publicaciones.map((pub) => (
+                <CartaPublicacion 
+                  key={pub.id} 
+                  pub={pub} 
+                  onClick={() => setSelectedPub(pub)} 
+                />
+              ))
+            ) : (
+              <p style={{ textAlign: "center", color: "#6c757d", gridColumn: "1 / -1" }}>
+                No hay publicaciones disponibles en este momento.
+              </p>
+            )}
           </div>
         </div>
       </section>
