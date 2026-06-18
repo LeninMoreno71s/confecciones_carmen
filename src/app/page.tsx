@@ -1,9 +1,30 @@
 "use client";
+import React, { useState } from "react";
 import Footer from "../../components/footer";
 import Link from "next/link";
 import Carta from "../../components/carta_producto";
+import CartaPublicacion from "../../components/carta_publicacion";
 
 export default function HomePage() {
+  const [selectedPub, setSelectedPub] = useState<any>(null);
+
+  const publicacionesMock = [
+    {
+      id: 1,
+      imagen: "/oso_traje.webp",
+      titulo: "Nueva Colección de Disfraces",
+      fecha: "15/06/2026",
+      descripcion: "Estamos emocionados de anunciar nuestra nueva colección de disfraces para esta temporada. Hemos trabajado duro para traer los mejores diseños y materiales. ¡Ven a verlos! Tendremos promociones especiales para los primeros compradores."
+    },
+    {
+      id: 2,
+      imagen: "/traje_caporal.jpg",
+      titulo: "Taller de Costura Básica",
+      fecha: "10/06/2026",
+      descripcion: "El próximo mes abriremos un taller de costura básica para todos los interesados en aprender este hermoso arte. Las inscripciones ya están abiertas. No se requiere experiencia previa, solo ganas de aprender."
+    }
+  ];
+
   return (
     <main>
       {/* HERO SECTION */}
@@ -382,6 +403,61 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* SECCIÓN DE PUBLICACIONES */}
+      <section style={{ padding: "4rem 2rem", background: "white" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+            <span style={{ display: "inline-block", background: "#e2e3e5", color: "#383d41", padding: "0.4rem 1.2rem", borderRadius: "999px", fontSize: "0.85rem", fontWeight: 600, marginBottom: "1rem" }}>
+              📰 Novedades
+            </span>
+            <h2 style={{ fontSize: "2.2rem", fontWeight: 700, color: "#212529", marginBottom: "0.5rem" }}>
+              Últimas Publicaciones
+            </h2>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
+            {/* Renderizamos el componente reutilizable de la publicación pasándole sus props */}
+            {publicacionesMock.map((pub) => (
+              <CartaPublicacion 
+                key={pub.id} 
+                pub={pub} 
+                onClick={() => setSelectedPub(pub)} 
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* MODAL DE PUBLICACIÓN */}
+      {selectedPub && (
+        <div 
+          onClick={() => setSelectedPub(null)} // Cierra al hacer clic afuera
+          style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} // Evita que se cierre al hacer clic adentro de la tarjeta blanca
+            style={{ background: "white", borderRadius: "12px", maxWidth: "600px", width: "100%", overflow: "hidden", position: "relative", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
+          >
+            <button 
+              onClick={() => setSelectedPub(null)}
+              style={{ 
+                position: "absolute", top: "15px", right: "15px", background: "#dc3545", color: "white", 
+                border: "none", borderRadius: "50%", width: "36px", height: "36px", 
+                cursor: "pointer", fontSize: "1.2rem", fontWeight: "bold", zIndex: 10 
+              }}
+            >
+              ✕
+            </button>
+            <img src={selectedPub.imagen} alt={selectedPub.titulo} style={{ width: "100%", height: "250px", objectFit: "cover" }} />
+            <div style={{ padding: "2rem" }}>
+              <small style={{ color: "#6c757d", fontWeight: 600 }}>{selectedPub.fecha}</small>
+              <h2 style={{ margin: "0.5rem 0", color: "#212529" }}>{selectedPub.titulo}</h2>
+              <p style={{ color: "#495057", lineHeight: "1.6" }}>{selectedPub.descripcion}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* FOOTER */}
       
