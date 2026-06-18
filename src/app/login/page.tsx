@@ -2,22 +2,49 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { iniciarSesion } = useAuth();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setCargando(true);
 
-    // Simulación de autenticación (reemplazar con lógica real)
+    // 1. Verificar si es el ADMINISTRADOR
     if (email === "admin@confeccionescarmen.cl" && password === "admin123") {
+      // Guardar sesión de admin en localStorage
+      const adminData = {
+        id: "admin-001",
+        nombre: "Administrador",
+        apellido: "Sistema",
+        correo: "admin@confeccionescarmen.cl",
+        telefono: "",
+        rol: "admin",
+      };
+      localStorage.setItem("usuario_actual", JSON.stringify(adminData));
+      setCargando(false);
       router.push("/dashboard");
+      return;
+    }
+
+    // 2. Verificar si es un CLIENTE registrado
+    const resultado = iniciarSesion(email, password);
+    setCargando(false);
+
+    if (resultado) {
+      // Redirigir a la página principal
+      router.push("/?login=exitoso");
     } else {
-      setError("Credenciales incorrectas");
+      setError("Credenciales incorrectas. Verifica tu correo y contraseña.");
     }
   };
 
@@ -58,9 +85,25 @@ export default function LoginPage() {
             Confecciones Carmen
           </h1>
           <p style={{ color: "#6c757d", fontSize: "0.9rem", marginTop: "0.25rem" }}>
-            Intranet - Acceso restringido
+            Inicia sesión en tu cuenta
           </p>
         </div>
+
+        {/* Mensaje de registro exitoso */}
+        {typeof window !== "undefined" && 
+         new URLSearchParams(window.location.search).get("registro") === "exitoso" && (
+          <div style={{
+            background: "#d4edda",
+            color: "#155724",
+            padding: "0.75rem",
+            borderRadius: "8px",
+            marginBottom: "1rem",
+            fontSize: "0.9rem",
+            textAlign: "center"
+          }}>
+            ✅ ¡Cuenta creada con éxito! Ahora inicia sesión
+          </div>
+        )}
 
         {/* Formulario */}
         <form onSubmit={handleSubmit}>
@@ -78,7 +121,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@confeccionescarmen.cl"
+              placeholder="correo@ejemplo.cl"
               required
               style={{
                 width: "100%",
@@ -133,38 +176,56 @@ export default function LoginPage() {
               fontSize: "0.9rem",
               textAlign: "center"
             }}>
-              {error}
+              ❌ {error}
             </div>
           )}
 
           <button
             type="submit"
+            disabled={cargando}
             style={{
               width: "100%",
               padding: "0.75rem",
-              background: "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
+              background: cargando 
+                ? "#6c757d" 
+                : "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
               color: "white",
               border: "none",
               borderRadius: "8px",
               fontSize: "1rem",
               fontWeight: 600,
-              cursor: "pointer",
+              cursor: cargando ? "not-allowed" : "pointer",
               transition: "opacity 0.2s"
             }}
-            onMouseOver={(e) => e.currentTarget.style.opacity = "0.9"}
-            onMouseOut={(e) => e.currentTarget.style.opacity = "1"}
+            onMouseOver={(e) => {
+              if (!cargando) e.currentTarget.style.opacity = "0.9";
+            }}
+            onMouseOut={(e) => {
+              if (!cargando) e.currentTarget.style.opacity = "1";
+            }}
           >
-            Iniciar Sesión
+            {cargando ? "Iniciando sesión..." : "Iniciar Sesión"}
           </button>
         </form>
 
+        {/* Enlace para crear cuenta */}
         <p style={{
           textAlign: "center",
           marginTop: "1.5rem",
-          fontSize: "0.8rem",
+          fontSize: "0.9rem",
           color: "#6c757d"
         }}>
-          ¿Olvidaste tu contraseña? Contacta al administrador
+          ¿No tienes cuenta?{" "}
+          <Link
+            href="/registro"
+            style={{
+              color: "#8B3A4A",
+              fontWeight: 600,
+              textDecoration: "none"
+            }}
+          >
+            Crear Cuenta
+          </Link>
         </p>
       </div>
     </div>
