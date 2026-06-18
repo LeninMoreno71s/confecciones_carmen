@@ -8,7 +8,7 @@ export default function DashboardPage() {
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊", active: true },
-    { href: "/productos", label: "Productos", icon: "👗", active: false },
+   { href: "/productos", label: "Productos", icon: "👗", active: false },
     { href: "/pedidos", label: "Pedidos", icon: "📦", active: false },
     { href: "/citas", label: "Citas", icon: "📅", active: false },
     { href: "/usuarios", label: "Usuarios", icon: "👥", active: false },

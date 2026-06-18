@@ -1,6 +1,7 @@
 "use client";
 import Footer from "../../components/footer";
 import Link from "next/link";
+import Carta from "../../components/carta_producto";
 
 export default function HomePage() {
   return (
@@ -19,7 +20,18 @@ export default function HomePage() {
           position: "relative",
           overflow: "hidden",
         }}
-      >
+        >
+        {/* Logo centrado arriba */}
+        <img
+          src="/ConC alter version.png"
+          alt="Logo Confecciones Carmen"
+          style={{
+            maxWidth: "600px",   // límite máximo en pantallas grandes
+            width: "100%",       // ocupa todo el ancho disponible
+            height: "auto",      // mantiene proporción
+            marginBottom: "1rem",
+          }}
+        />
         {/* Fondo decorativo */}
         <div
           style={{
@@ -210,12 +222,61 @@ export default function HomePage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
               gap: "2rem",
             }}
           >
             {/* Aquí irán las tarjetas de productos */}
-            
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+                gap: "2rem",
+              }}
+            >
+              <Carta
+              image="/oso_traje.webp"
+              name="Traje Oso"
+              descripcion="Traje completo de oso con detalles artesanales."
+              costo={45000}
+              stock={3}
+            />
+            <Carta
+              image="/cabeza_oso.webp"
+              name="Cabeza Oso"
+              descripcion="Cabeza decorada con colores vibrantes."
+              costo={20000}
+              stock={5}
+            />
+            <Carta
+              image="/saya-boy.webp"
+              name="Saya Boy"
+              descripcion="Vestimenta tradicional con cinturón rojo."
+              costo={35000}
+              stock={1}
+            />
+            <Carta
+              image="/traje.webp"
+              name="Traje"
+              descripcion="Vestimenta Disfraz Jesús"
+              costo={35000}
+              stock={1}
+            />
+            <Carta
+              image="/traje_caporal.jpg"
+              name="Traje Caporal"
+              descripcion="Vestimenta Caporal"
+              costo={35000}
+              stock={0}
+            />
+            <Carta
+              image="/traje_niña.jpg"
+              name="Traje Niña"
+              descripcion="Vestimenta para niñas a la medida"
+              costo={35000}
+              stock={1}
+            />
+            </div>
           </div>
         </div>
       </section>
