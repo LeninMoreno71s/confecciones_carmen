@@ -1,10 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+  const { estaAutenticado } = useAuth();
+
+  useEffect(() => {
+    // Protección básica de ruta
+    const userGuardado = localStorage.getItem("usuario_actual");
+    if (!estaAutenticado && !userGuardado) {
+      router.push("/login");
+    }
+  }, [estaAutenticado, router]);
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊", active: true },

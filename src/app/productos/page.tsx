@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Carta from "../../../components/carta_producto"; // tu componente
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 
 interface CartaProducto {
   id: number;
@@ -12,6 +14,8 @@ interface CartaProducto {
 }
 
 export default function ProductosPage() {
+  const router = useRouter();
+  const { estaAutenticado } = useAuth();
   const [productos, setProductos] = useState<CartaProducto[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [nuevo, setNuevo] = useState<CartaProducto>({
@@ -25,6 +29,13 @@ export default function ProductosPage() {
 
   // Cargar al iniciar
   useEffect(() => {
+    // Protección básica de ruta
+    const userGuardado = localStorage.getItem("usuario_actual");
+    if (!estaAutenticado && !userGuardado) {
+      router.push("/login");
+      return;
+    }
+
     const data = localStorage.getItem("productos");
     if (data) {
       setProductos(JSON.parse(data));

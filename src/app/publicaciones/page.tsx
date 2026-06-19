@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 
 export interface Publicacion {
   id: string;
@@ -14,16 +15,17 @@ export interface Publicacion {
 
 export default function PublicacionesPage() {
   const router = useRouter();
+  const { estaAutenticado } = useAuth();
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
   const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
-    // Protección de ruta (Solo Admin)
-    // TODO: Implementar AuthContext en el futuro
-    // if (!user || user.role !== "admin") {
-    //   router.push("/");
-    //   return;
-    // }
+    // Protección de ruta básica
+    const userGuardado = localStorage.getItem("usuario_actual");
+    if (!estaAutenticado && !userGuardado) {
+      router.push("/login");
+      return;
+    }
 
     // Cargar datos
     const data = localStorage.getItem("publicaciones");

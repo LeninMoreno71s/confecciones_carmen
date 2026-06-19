@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 
 export interface Publicacion {
   id: string;
@@ -14,6 +15,7 @@ export interface Publicacion {
 export default function FormularioPublicacion() {
   const { id } = useParams();
   const router = useRouter();
+  const { estaAutenticado } = useAuth();
   
   const [publicacion, setPublicacion] = useState<Partial<Publicacion>>({
     titulo: "",
@@ -25,8 +27,11 @@ export default function FormularioPublicacion() {
 
   useEffect(() => {
     // Protección
-    // TODO: Implementar AuthContext
-    // if (!user || user.role !== "admin") return router.push("/");
+    const userGuardado = localStorage.getItem("usuario_actual");
+    if (!estaAutenticado && !userGuardado) {
+      router.push("/login");
+      return;
+    }
 
     // Si no es "nuevo", cargamos los datos para editar
     if (id !== "nuevo") {
