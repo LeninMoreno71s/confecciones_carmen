@@ -6,6 +6,7 @@ import Link from "next/link";
 import Carta from "../../components/carta_producto";
 import CartaPublicacion from "../../components/carta_publicacion";
 import { CartaProducto, ItemCarrito } from "../../types/productos";
+import { useAuth } from "../app/context/AuthContext";
 
 const agregarAlCarrito = (producto: CartaProducto) => {
   const data = localStorage.getItem("carrito");
@@ -30,14 +31,13 @@ const agregarAlCarrito = (producto: CartaProducto) => {
 export default function HomePage() {
   const [selectedPub, setSelectedPub] = useState<any>(null);
   const [publicaciones, setPublicaciones] = useState<any[]>([]);
+  const { estaAutenticado } = useAuth();
 
   useEffect(() => {
-    // Intentamos cargar las publicaciones creadas por el admin desde el localStorage
     const pubGuardadas = localStorage.getItem("publicaciones");
     if (pubGuardadas && JSON.parse(pubGuardadas).length > 0) {
       setPublicaciones(JSON.parse(pubGuardadas));
     } else {
-      // Si no hay ninguna publicación real todavía, mostramos estas de ejemplo
       const publicacionesMock = [
         {
           id: 1,
@@ -169,6 +169,7 @@ export default function HomePage() {
             y dedicación en cada puntada.
           </p>
 
+          {/* BOTONES DEL HERO */}
           <div
             style={{
               display: "flex",
@@ -177,91 +178,34 @@ export default function HomePage() {
               flexWrap: "wrap",
             }}
           >
-            <Link
-              href="#productos"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.85rem 2rem",
-                background: "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
-                color: "white",
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "1rem",
-                fontWeight: 600,
-                textDecoration: "none",
-                boxShadow: "0 4px 16px rgba(43, 122, 43, 0.3)",
-                transition: "transform 0.2s",
-              }}
-            >
+            {/* Ver Productos - Siempre visible */}
+            <Link href="#productos" style={botonVerde}>
               👗 Ver Productos
             </Link>
 
-            {/* BOTÓN CREAR CUENTA */}
-            <Link
-              href="/registro"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.85rem 2rem",
-                background: "white",
-                color: "#8B3A4A",
-                border: "2px solid #8B3A4A",
-                borderRadius: "12px",
-                fontSize: "1rem",
-                fontWeight: 600,
-                textDecoration: "none",
-                transition: "transform 0.2s",
-              }}
-            >
-              ✨ Crear Cuenta
-            </Link>
+            {/* SI NO ESTÁ AUTENTICADO: mostrar Crear Cuenta + Iniciar Sesión */}
+            {!estaAutenticado && (
+              <>
+                <Link href="/registro" style={botonBordeBordo}>
+                  ✨ Crear Cuenta
+                </Link>
+                <Link href="/login" style={botonBordeVerde}>
+                  🔐 Iniciar Sesión
+                </Link>
+              </>
+            )}
 
-            {/* BOTÓN INICIAR SESIÓN */}
-            <Link
-              href="/login"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.85rem 2rem",
-                background: "white",
-                color: "#2b7a2b",
-                border: "2px solid #2b7a2b",
-                borderRadius: "12px",
-                fontSize: "1rem",
-                fontWeight: 600,
-                textDecoration: "none",
-                transition: "transform 0.2s",
-              }}
-            >
-              🔐 Iniciar Sesión
-            </Link>
-
-            {/* Botón para ir al carrito */}
-            <Link href="/carrito">
-              <button
-                style={{
-                  display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.85rem 2rem",
-                background: "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
-                color: "white",
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "1rem",
-                fontWeight: 600,
-                textDecoration: "none",
-                boxShadow: "0 4px 16px rgba(43, 122, 43, 0.3)",
-                transition: "transform 0.2s",
-                }}
-              >
-                🛒 Ver Carrito
-              </button>
-            </Link>
+            {/* SI ESTÁ AUTENTICADO: mostrar Agendar Cita + Ver Carrito */}
+            {estaAutenticado && (
+              <>
+                <Link href="/agendar-cita" style={botonBordeBordo}>
+                  📅 Agendar Cita
+                </Link>
+                <Link href="/carrito" style={botonVerde}>
+                  🛒 Ver Carrito
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -320,7 +264,7 @@ export default function HomePage() {
               Cada prenda es elaborada con dedicación y los mejores materiales
             </p>
           </div>
-              
+
           {/* Grid de productos */}
           <div
             style={{
@@ -499,7 +443,6 @@ export default function HomePage() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "2rem" }}>
-            {/* Renderizamos el componente reutilizable mapeando el estado de publicaciones reales */}
             {publicaciones.length > 0 ? (
               publicaciones.map((pub) => (
                 <CartaPublicacion 
@@ -560,3 +503,53 @@ export default function HomePage() {
     </main>
   );
 }
+
+// =========================================================================
+// ESTILOS DE BOTONES
+// =========================================================================
+
+const botonVerde: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.5rem",
+  padding: "0.85rem 2rem",
+  background: "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
+  color: "white",
+  border: "none",
+  borderRadius: "12px",
+  fontSize: "1rem",
+  fontWeight: 600,
+  textDecoration: "none",
+  boxShadow: "0 4px 16px rgba(43, 122, 43, 0.3)",
+  transition: "transform 0.2s",
+};
+
+const botonBordeVerde: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.5rem",
+  padding: "0.85rem 2rem",
+  background: "white",
+  color: "#2b7a2b",
+  border: "2px solid #2b7a2b",
+  borderRadius: "12px",
+  fontSize: "1rem",
+  fontWeight: 600,
+  textDecoration: "none",
+  transition: "transform 0.2s",
+};
+
+const botonBordeBordo: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.5rem",
+  padding: "0.85rem 2rem",
+  background: "white",
+  color: "#8B3A4A",
+  border: "2px solid #8B3A4A",
+  borderRadius: "12px",
+  fontSize: "1rem",
+  fontWeight: 600,
+  textDecoration: "none",
+  transition: "transform 0.2s",
+};

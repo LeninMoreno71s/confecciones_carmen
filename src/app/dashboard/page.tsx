@@ -192,7 +192,7 @@ export default function DashboardPage() {
             📦 Nuevo Pedido
           </Link>
           <Link href="/citas" className="btn btn-outline">
-            📅 Agendar Cita
+            📅 Citas agendadas
           </Link>
           <Link href="/publicaciones/nuevo" className="btn btn-outline">
             📝 Nueva Publicación
