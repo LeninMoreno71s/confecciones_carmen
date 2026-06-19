@@ -37,6 +37,34 @@ export default function CarritoPage() {
   const calcularTotal = () =>
     carrito.reduce((acc, item) => acc + item.costo * item.cantidad, 0);
 
+  const finalizarCompra = () => {
+  if (carrito.length === 0) return;
+
+  const usuarioActual = JSON.parse(localStorage.getItem("usuario_actual") || "{}");
+
+  const nuevoPedido = {
+    id: Date.now(),
+    cliente: `${usuarioActual.nombre} ${usuarioActual.apellido}` || usuarioActual.correo || "Invitado",
+    productos: carrito.map((item) => ({
+      nombre: item.name,
+      cantidad: item.cantidad,
+    })),
+    fecha: new Date().toLocaleString(),
+    estado: "Pendiente",
+  };
+
+  const data = localStorage.getItem("pedidos");
+  const pedidos = data ? JSON.parse(data) : [];
+  pedidos.push(nuevoPedido);
+  localStorage.setItem("pedidos", JSON.stringify(pedidos));
+
+  localStorage.removeItem("carrito");
+  setCarrito([]);
+
+  alert("✅ Compra finalizada. El pedido fue generado.");
+  };
+
+
   return (
     <div
       style={{
@@ -113,19 +141,37 @@ export default function CarritoPage() {
 
       {/* Total general */}
       {carrito.length > 0 && (
-        <div
-          style={{
-            marginTop: "2rem",
-            padding: "1rem",
-            backgroundColor: "#E6BE8A",
-            borderRadius: "8px",
-            textAlign: "right",
-            fontWeight: 700,
-            color: "#800020",
-          }}
-        >
-          Total a pagar: ${calcularTotal()}
-        </div>
+        <>
+          <div
+            style={{
+              marginTop: "2rem",
+              padding: "1rem",
+              backgroundColor: "#E6BE8A",
+              borderRadius: "8px",
+              textAlign: "right",
+              fontWeight: 700,
+              color: "#800020",
+            }}
+          >
+            Total a pagar: ${calcularTotal()}
+          </div>
+          {/* JSX del botón de compra */}
+          <button
+            onClick={finalizarCompra}
+            style={{
+              marginTop: "1rem",
+              padding: "0.6rem 1.2rem",
+              backgroundColor: "#3FA572",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            ✅ Finalizar compra
+          </button>
+        </>
       )}
 
       {/* Botón para volver a la página principal */}

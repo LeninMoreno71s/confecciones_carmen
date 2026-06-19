@@ -81,6 +81,24 @@ export default function Header() {
               </span>
             </div>
 
+            {/* Botón Panel Admin (solo si es admin) */}
+            {usuario.rol === "admin" && (
+              <Link
+                href="/dashboard"
+                style={{
+                  padding: "0.5rem 1.2rem",
+                  background: "#FFD700",
+                  color: "#000",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  textDecoration: "none",
+                }}
+              >
+                ⚙️ Panel Admin
+              </Link>
+            )}
+
             {/* Botón cerrar sesión */}
             <button
               onClick={cerrarSesion}

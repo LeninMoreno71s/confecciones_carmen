@@ -7,24 +7,15 @@ import { useAuth } from "../context/AuthContext";
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { usuario, estaAutenticado, cerrarSesion } = useAuth();
   const router = useRouter();
-  const { estaAutenticado } = useAuth();
 
+  // Protección de acceso solo para admin
   useEffect(() => {
-    // Protección estricta: Solo Admin
-    const userGuardado = localStorage.getItem("usuario_actual");
-    let esAdmin = false;
-    if (userGuardado) {
-      try {
-        const u = JSON.parse(userGuardado);
-        if (u.rol === "admin") esAdmin = true;
-      } catch (e) {}
-    }
-
-    if (!esAdmin) {
+    if (!estaAutenticado || usuario?.rol !== "admin") {
       router.push("/login");
     }
-  }, [router]);
+  }, [estaAutenticado, usuario, router]);
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊", active: true },
@@ -58,10 +49,7 @@ export default function DashboardPage() {
           <ul className="sidebar-nav">
             {menuItems.map((item) => (
               <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={item.active ? "active" : ""}
-                >
+                <Link href={item.href} className={item.active ? "active" : ""}>
                   <span>{item.icon}</span>
                   {item.label}
                 </Link>
@@ -70,27 +58,37 @@ export default function DashboardPage() {
           </ul>
         </nav>
 
-        <div style={{
-          position: "absolute",
-          bottom: "1.5rem",
-          left: "1.5rem",
-          right: "1.5rem"
-        }}>
-          <Link
-            href="/"
+        {/* Botón de cerrar sesión */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "1.5rem",
+            left: "1.5rem",
+            right: "1.5rem",
+          }}
+        >
+          <button
+            onClick={() => {
+              cerrarSesion();
+              router.push("/login");
+            }}
             style={{
               display: "flex",
               alignItems: "center",
               gap: "0.5rem",
               padding: "0.75rem",
-              color: "rgba(255,255,255,0.7)",
-              textDecoration: "none",
+              color: "rgba(255,255,255,0.9)",
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.3)",
               borderRadius: "8px",
-              fontSize: "0.9rem"
+              cursor: "pointer",
+              fontSize: "0.9rem",
+              width: "100%",
+              justifyContent: "center",
             }}
           >
             🚪 Cerrar Sesión
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -99,6 +97,7 @@ export default function DashboardPage() {
         {/* Botón hamburguesa móvil */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="mobile-menu-btn"
           style={{
             display: "none",
             position: "fixed",
@@ -111,9 +110,8 @@ export default function DashboardPage() {
             borderRadius: "8px",
             padding: "0.5rem",
             cursor: "pointer",
-            fontSize: "1.5rem"
+            fontSize: "1.5rem",
           }}
-          className="mobile-menu-btn"
         >
           ☰
         </button>
@@ -123,9 +121,11 @@ export default function DashboardPage() {
           <h1>📊 Dashboard</h1>
           <div className="top-bar-user">
             <span style={{ fontSize: "0.9rem", color: "var(--gray-700)" }}>
-              Admin
+              {usuario?.nombre} {usuario?.apellido} ({usuario?.rol})
             </span>
-            <div className="avatar">A</div>
+            <div className="avatar">
+              {usuario?.nombre?.charAt(0) || "A"}
+            </div>
           </div>
         </div>
 
@@ -157,26 +157,15 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
+                {/* Aquí deberías mapear pedidos reales desde localStorage */}
                 <tr>
                   <td>#001</td>
                   <td>María García</td>
-                  <td>Traje de Oso Mistico</td>
+                  <td>Traje de Oso Místico</td>
                   <td>15/06/2026</td>
-                  <td><span className="badge badge-warning">Pendiente</span></td>
-                </tr>
-                <tr>
-                  <td>#002</td>
-                  <td>Juan Pérez</td>
-                  <td>Vestido para niña</td>
-                  <td>14/06/2026</td>
-                  <td><span className="badge badge-success">Completado</span></td>
-                </tr>
-                <tr>
-                  <td>#003</td>
-                  <td>Ana López</td>
-                  <td>Modificaciones</td>
-                  <td>13/06/2026</td>
-                  <td><span className="badge badge-danger">Cancelado</span></td>
+                  <td>
+                    <span className="badge badge-warning">Pendiente</span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -196,6 +185,9 @@ export default function DashboardPage() {
           </Link>
           <Link href="/publicaciones/nuevo" className="btn btn-outline">
             📝 Nueva Publicación
+          </Link>
+          <Link href="/" className="btn btn-success">
+            🏠 Ir a la Página Principal
           </Link>
         </div>
       </main>

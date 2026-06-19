@@ -4,10 +4,11 @@ import Carta from "../../../components/carta_producto";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { CartaProducto } from "../../../types/productos";
+import Link from "next/link";
 
 export default function ProductosPage() {
   const router = useRouter();
-  const { estaAutenticado } = useAuth();
+  const { usuario, estaAutenticado } = useAuth(); // ✅ ahora sí extraemos usuario
   const [productos, setProductos] = useState<CartaProducto[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [nuevo, setNuevo] = useState<CartaProducto>({
@@ -21,7 +22,6 @@ export default function ProductosPage() {
 
   // Cargar al iniciar
   useEffect(() => {
-    // Protección básica de ruta
     const userGuardado = localStorage.getItem("usuario_actual");
     if (!estaAutenticado && !userGuardado) {
       router.push("/login");
@@ -32,7 +32,7 @@ export default function ProductosPage() {
     if (data) {
       setProductos(JSON.parse(data));
     }
-  }, []);
+  }, [estaAutenticado, router]);
 
   // Guardar cambios
   const guardarProductos = (lista: CartaProducto[]) => {
@@ -40,15 +40,21 @@ export default function ProductosPage() {
     localStorage.setItem("productos", JSON.stringify(lista));
   };
 
-// Crear con id incremental
-const crearProducto = () => {
-  const ultimoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) : 0;
-  const nuevoProducto = { ...nuevo, id: ultimoId + 1 };
-  guardarProductos([...productos, nuevoProducto]);
-  setNuevo({ id: 0, image: "", name: "", descripcion: "", costo: 0, stock: 0 });
-};
-
-
+  // Crear con id incremental
+  const crearProducto = () => {
+    const ultimoId =
+      productos.length > 0 ? Math.max(...productos.map((p) => p.id)) : 0;
+    const nuevoProducto = { ...nuevo, id: ultimoId + 1 };
+    guardarProductos([...productos, nuevoProducto]);
+    setNuevo({
+      id: 0,
+      image: "",
+      name: "",
+      descripcion: "",
+      costo: 0,
+      stock: 0,
+    });
+  };
 
   // Eliminar
   const eliminarProducto = (id: number) => {
@@ -70,6 +76,24 @@ const crearProducto = () => {
   return (
     <div style={{ padding: "2rem" }}>
       <h1>👗 Administración de Cartas</h1>
+
+      {/* Botón para ir al carrito */}
+      <Link href="/carrito">
+        <button
+          style={{
+            marginBottom: "1rem",
+            padding: "0.6rem 1.2rem",
+            backgroundColor: "#800020",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
+        >
+          🛒 Ir al carrito
+        </button>
+      </Link>
 
       {/* Formulario para crear carta */}
       <div style={{ marginBottom: "1rem" }}>
@@ -132,12 +156,20 @@ const crearProducto = () => {
               name={p.name}
               descripcion={p.descripcion}
               costo={p.costo}
-              stock={p.stock} onAddToCart={function (producto: CartaProducto): void {
-                throw new Error("Function not implemented.");
-              } }            />
+              stock={p.stock}
+              onAddToCart={() => {
+                // Aquí puedes implementar la lógica de añadir al carrito
+                const carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+                carrito.push({ ...p, cantidad: 1 });
+                localStorage.setItem("carrito", JSON.stringify(carrito));
+                alert(`${p.name} añadido al carrito`);
+              }}
+            />
             <div style={{ marginTop: "0.5rem" }}>
               <button onClick={() => eliminarProducto(p.id)}>🗑️ Eliminar</button>
-              <button onClick={() => modificarProducto(p.id, { stock: p.stock + 1 })}>
+              <button
+                onClick={() => modificarProducto(p.id, { stock: p.stock + 1 })}
+              >
                 ➕ Stock
               </button>
             </div>
