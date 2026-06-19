@@ -5,6 +5,27 @@ import Header from "../../components/header";
 import Link from "next/link";
 import Carta from "../../components/carta_producto";
 import CartaPublicacion from "../../components/carta_publicacion";
+import { CartaProducto, ItemCarrito } from "../../types/productos";
+
+const agregarAlCarrito = (producto: CartaProducto) => {
+  const data = localStorage.getItem("carrito");
+  const carrito: ItemCarrito[] = data ? JSON.parse(data) : [];
+
+  const existe = carrito.find((item) => item.id === producto.id);
+  if (existe) {
+    const actualizado = carrito.map((item) =>
+      item.id === producto.id
+        ? { ...item, cantidad: item.cantidad + 1 }
+        : item
+    );
+    localStorage.setItem("carrito", JSON.stringify(actualizado));
+  } else {
+    localStorage.setItem(
+      "carrito",
+      JSON.stringify([...carrito, { ...producto, cantidad: 1 }])
+    );
+  }
+};
 
 export default function HomePage() {
   const [selectedPub, setSelectedPub] = useState<any>(null);
@@ -218,6 +239,29 @@ export default function HomePage() {
             >
               🔐 Iniciar Sesión
             </Link>
+
+            {/* Botón para ir al carrito */}
+            <Link href="/carrito">
+              <button
+                style={{
+                  display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.85rem 2rem",
+                background: "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
+                color: "white",
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "1rem",
+                fontWeight: 600,
+                textDecoration: "none",
+                boxShadow: "0 4px 16px rgba(43, 122, 43, 0.3)",
+                transition: "transform 0.2s",
+                }}
+              >
+                🛒 Ver Carrito
+              </button>
+            </Link>
           </div>
         </div>
 
@@ -276,7 +320,7 @@ export default function HomePage() {
               Cada prenda es elaborada con dedicación y los mejores materiales
             </p>
           </div>
-
+              
           {/* Grid de productos */}
           <div
             style={{
@@ -286,46 +330,58 @@ export default function HomePage() {
             }}
           >
             <Carta
+              id={1}
               image="/oso_traje.webp"
               name="Traje Oso"
               descripcion="Traje completo de oso con detalles artesanales."
               costo={45000}
               stock={3}
+              onAddToCart={agregarAlCarrito}
             />
             <Carta
+              id={2}
               image="/cabeza_oso.webp"
               name="Cabeza Oso"
               descripcion="Cabeza decorada con colores vibrantes."
               costo={20000}
               stock={5}
+              onAddToCart={agregarAlCarrito}
             />
             <Carta
+              id={3}
               image="/saya-boy.webp"
               name="Saya Boy"
               descripcion="Vestimenta tradicional con cinturón rojo."
               costo={35000}
               stock={1}
+              onAddToCart={agregarAlCarrito}
             />
             <Carta
+              id={4}
               image="/traje.webp"
               name="Traje"
               descripcion="Vestimenta Disfraz Jesús"
               costo={35000}
               stock={1}
+              onAddToCart={agregarAlCarrito}
             />
             <Carta
+              id={5}
               image="/traje_caporal.jpg"
               name="Traje Caporal"
               descripcion="Vestimenta Caporal"
               costo={35000}
               stock={0}
+              onAddToCart={agregarAlCarrito}
             />
             <Carta
+              id={6}
               image="/traje_niña.jpg"
               name="Traje Niña"
               descripcion="Vestimenta para niñas a la medida"
               costo={35000}
               stock={1}
+              onAddToCart={agregarAlCarrito}
             />
           </div>
         </div>

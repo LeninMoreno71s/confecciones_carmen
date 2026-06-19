@@ -1,17 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import Carta from "../../../components/carta_producto"; // tu componente
+import Carta from "../../../components/carta_producto";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
-
-interface CartaProducto {
-  id: number;
-  image: string;
-  name: string;
-  descripcion: string;
-  costo: number;
-  stock: number;
-}
+import { CartaProducto } from "../../../types/productos";
 
 export default function ProductosPage() {
   const router = useRouter();
@@ -48,12 +40,15 @@ export default function ProductosPage() {
     localStorage.setItem("productos", JSON.stringify(lista));
   };
 
-  // Crear
-  const crearProducto = () => {
-    const nuevoProducto = { ...nuevo, id: Date.now() };
-    guardarProductos([...productos, nuevoProducto]);
-    setNuevo({ id: 0, image: "", name: "", descripcion: "", costo: 0, stock: 0 });
-  };
+// Crear con id incremental
+const crearProducto = () => {
+  const ultimoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) : 0;
+  const nuevoProducto = { ...nuevo, id: ultimoId + 1 };
+  guardarProductos([...productos, nuevoProducto]);
+  setNuevo({ id: 0, image: "", name: "", descripcion: "", costo: 0, stock: 0 });
+};
+
+
 
   // Eliminar
   const eliminarProducto = (id: number) => {
@@ -132,12 +127,14 @@ export default function ProductosPage() {
         {resultados.map((p) => (
           <div key={p.id}>
             <Carta
+              id={p.id}
               image={p.image}
               name={p.name}
               descripcion={p.descripcion}
               costo={p.costo}
-              stock={p.stock}
-            />
+              stock={p.stock} onAddToCart={function (producto: CartaProducto): void {
+                throw new Error("Function not implemented.");
+              } }            />
             <div style={{ marginTop: "0.5rem" }}>
               <button onClick={() => eliminarProducto(p.id)}>🗑️ Eliminar</button>
               <button onClick={() => modificarProducto(p.id, { stock: p.stock + 1 })}>
