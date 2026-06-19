@@ -16,6 +16,7 @@ export default function ProductosPage() {
     image: "",
     name: "",
     descripcion: "",
+    categoria: "",
     costo: 0,
     stock: 0,
   });
@@ -27,6 +28,7 @@ export default function ProductosPage() {
       image: "/oso_traje.webp",
       name: "Traje Oso",
       descripcion: "Traje completo de oso con detalles artesanales.",
+      categoria: "Trajes",
       costo: 45000,
       stock: 3,
     },
@@ -35,6 +37,7 @@ export default function ProductosPage() {
       image: "/cabeza_oso.webp",
       name: "Cabeza Oso",
       descripcion: "Cabeza decorada con colores vibrantes.",
+      categoria: "Accesorios",
       costo: 20000,
       stock: 5,
     },
@@ -43,6 +46,7 @@ export default function ProductosPage() {
       image: "/saya-boy.webp",
       name: "Saya Boy",
       descripcion: "Vestimenta tradicional con cinturón rojo.",
+      categoria: "Trajes",
       costo: 35000,
       stock: 1,
     },
@@ -51,6 +55,7 @@ export default function ProductosPage() {
       image: "/traje.webp",
       name: "Traje",
       descripcion: "Vestimenta Disfraz Jesús",
+      categoria: "Trajes",
       costo: 35000,
       stock: 1,
     },
@@ -59,6 +64,7 @@ export default function ProductosPage() {
       image: "/traje_caporal.jpg",
       name: "Traje Caporal",
       descripcion: "Vestimenta Caporal",
+      categoria: "Trajes",
       costo: 35000,
       stock: 0,
     },
@@ -67,6 +73,7 @@ export default function ProductosPage() {
       image: "/traje_niña.jpg",
       name: "Traje Niña",
       descripcion: "Vestimenta para niñas a la medida",
+      categoria: "Trajes",
       costo: 35000,
       stock: 1,
     },
@@ -99,7 +106,7 @@ export default function ProductosPage() {
       productos.length > 0 ? Math.max(...productos.map((p) => p.id)) : 0;
     const nuevoProducto = { ...nuevo, id: ultimoId + 1 };
     guardarProductos([...productos, nuevoProducto]);
-    setNuevo({ id: 0, image: "", name: "", descripcion: "", costo: 0, stock: 0 });
+    setNuevo({ id: 0, image: "", name: "", descripcion: "", categoria: "", costo: 0, stock: 0 });
   };
 
   const eliminarProducto = (id: number) => {
@@ -110,9 +117,12 @@ export default function ProductosPage() {
     guardarProductos(productos.map((p) => (p.id === id ? { ...p, ...cambios } : p)));
   };
 
-  const resultados = productos.filter((p) =>
-    p.name.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const resultados = productos.filter(
+  (p) =>
+    p.name.toLowerCase().includes(busqueda.toLowerCase()) ||
+    p.categoria.toLowerCase().includes(busqueda.toLowerCase())
+);
+
 
 
 
@@ -156,6 +166,13 @@ export default function ProductosPage() {
           <input type="text" placeholder="Descripción" value={nuevo.descripcion}
             onChange={(e) => setNuevo({ ...nuevo, descripcion: e.target.value })}
             style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
+          <input
+            type="text"
+            placeholder="Categoría"
+            value={nuevo.categoria}
+            onChange={(e) => setNuevo({ ...nuevo, categoria: e.target.value })}
+            style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }}
+          />
           <input type="number" placeholder="Costo" value={nuevo.costo}
             onChange={(e) => setNuevo({ ...nuevo, costo: Number(e.target.value) })}
             style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
@@ -183,7 +200,7 @@ export default function ProductosPage() {
       {/* Buscar carta */}
       <input
         type="text"
-        placeholder="🔍 Buscar por nombre..."
+        placeholder="🔍 Buscar por nombre o categoría..."
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
         style={{
@@ -195,6 +212,7 @@ export default function ProductosPage() {
           maxWidth: "400px",
         }}
       />
+
 
 
       {/* Mostrar cartas */}
@@ -221,6 +239,7 @@ export default function ProductosPage() {
         image={p.image}
         name={p.name}
         descripcion={p.descripcion}
+        categoria={p.categoria}
         costo={p.costo}
         stock={p.stock}
         onAddToCart={() => {

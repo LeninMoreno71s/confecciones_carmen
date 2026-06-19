@@ -1,12 +1,15 @@
 // src/types/productos.ts
 export interface CartaProducto {
-  id: number; // importante para identificar en el carrito
+  id: number;
   image: string;
   name: string;
   descripcion: string;
+  categoria: string;
   costo: number;
   stock: number;
+  
 }
+
 
 export interface CartaProps extends CartaProducto {
   onAddToCart: (producto: CartaProducto) => void;
@@ -15,3 +18,4 @@ export interface CartaProps extends CartaProducto {
 export interface ItemCarrito extends CartaProducto {
   cantidad: number; // 👈 diferencia clave
 }
+

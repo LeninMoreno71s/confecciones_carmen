@@ -6,7 +6,16 @@ interface Props extends CartaProducto {
   onAddToCart: (producto: CartaProducto) => void;
 }
 
-const Carta: React.FC<Props> = ({ id, image, name, descripcion, costo, stock, onAddToCart }) => {
+const Carta: React.FC<Props> = ({
+  id,
+  image,
+  name,
+  descripcion,
+  categoria,
+  costo,
+  stock,
+  onAddToCart,
+}) => {
   const defaultImage = "/oso_traje.webp";
 
   return (
@@ -40,12 +49,45 @@ const Carta: React.FC<Props> = ({ id, image, name, descripcion, costo, stock, on
         }}
       />
       <div style={{ padding: "1rem" }}>
-        <h3 style={{ color: "#800020", fontWeight: 700, fontSize: "1.2rem" }}>{name}</h3>
-        <p style={{ fontSize: "0.9rem", color: "#3FA572", marginBottom: "0.5rem" }}>{descripcion}</p>
-        <p style={{ fontSize: "1rem", fontWeight: 600, color: "#212529", marginBottom: "0.5rem" }}>
+        <h3 style={{ color: "#800020", fontWeight: 700, fontSize: "1.2rem" }}>
+          {name}
+        </h3>
+        {/* ✅ Mostrar categoría */}
+        <p
+          style={{
+            fontSize: "0.85rem",
+            fontStyle: "italic",
+            color: "#555",
+            marginBottom: "0.5rem",
+          }}
+        >
+          Categoría: {categoria}
+        </p>
+        <p
+          style={{
+            fontSize: "0.9rem",
+            color: "#3FA572",
+            marginBottom: "0.5rem",
+          }}
+        >
+          {descripcion}
+        </p>
+        <p
+          style={{
+            fontSize: "1rem",
+            fontWeight: 600,
+            color: "#212529",
+            marginBottom: "0.5rem",
+          }}
+        >
           ${costo}
         </p>
-        <p style={{ fontSize: "0.85rem", color: stock > 0 ? "#2b7a2b" : "#800020" }}>
+        <p
+          style={{
+            fontSize: "0.85rem",
+            color: stock > 0 ? "#2b7a2b" : "#800020",
+          }}
+        >
           {stock > 0 ? `Stock disponible: ${stock}` : "Sin stock"}
         </p>
 
@@ -62,9 +104,23 @@ const Carta: React.FC<Props> = ({ id, image, name, descripcion, costo, stock, on
               fontWeight: 600,
               transition: "background-color 0.2s",
             }}
-            onClick={() => onAddToCart({ id, image, name, descripcion, costo, stock })}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#2b7a2b")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#3FA572")}
+            onClick={() =>
+              onAddToCart({
+                id,
+                image,
+                name,
+                descripcion,
+                categoria,
+                costo,
+                stock,
+              })
+            }
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#2b7a2b")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "#3FA572")
+            }
           >
             🛒 Añadir al carrito
           </button>

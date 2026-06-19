@@ -239,6 +239,7 @@ export default function HomePage() {
               image="/oso_traje.webp"
               name="Traje Oso"
               descripcion="Traje completo de oso con detalles artesanales."
+              categoria="Trajes"
               costo={45000}
               stock={3}
               onAddToCart={agregarAlCarrito}
@@ -248,6 +249,7 @@ export default function HomePage() {
               image="/cabeza_oso.webp"
               name="Cabeza Oso"
               descripcion="Cabeza decorada con colores vibrantes."
+              categoria="Accesorios"
               costo={20000}
               stock={5}
               onAddToCart={agregarAlCarrito}
@@ -257,6 +259,7 @@ export default function HomePage() {
               image="/saya-boy.webp"
               name="Saya Boy"
               descripcion="Vestimenta tradicional con cinturón rojo."
+              categoria="Trajes"
               costo={35000}
               stock={1}
               onAddToCart={agregarAlCarrito}
@@ -266,6 +269,7 @@ export default function HomePage() {
               image="/traje.webp"
               name="Traje"
               descripcion="Vestimenta Disfraz Jesús"
+              categoria="Trajes"
               costo={35000}
               stock={1}
               onAddToCart={agregarAlCarrito}
@@ -275,6 +279,7 @@ export default function HomePage() {
               image="/traje_caporal.jpg"
               name="Traje Caporal"
               descripcion="Vestimenta Caporal"
+              categoria="Trajes"
               costo={35000}
               stock={0}
               onAddToCart={agregarAlCarrito}
@@ -284,6 +289,7 @@ export default function HomePage() {
               image="/traje_niña.jpg"
               name="Traje Niña"
               descripcion="Vestimenta para niñas a la medida"
+              categoria="Trajes"
               costo={35000}
               stock={1}
               onAddToCart={agregarAlCarrito}
@@ -307,6 +313,7 @@ export default function HomePage() {
                   image={p.image}
                   name={p.name}
                   descripcion={p.descripcion}
+                  categoria={p.categoria}
                   costo={p.costo}
                   stock={p.stock}
                   onAddToCart={() => agregarAlCarrito(p)}
