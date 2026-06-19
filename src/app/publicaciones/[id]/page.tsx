@@ -26,9 +26,17 @@ export default function FormularioPublicacion() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Protección
+    // Protección estricta: Solo Admin
     const userGuardado = localStorage.getItem("usuario_actual");
-    if (!estaAutenticado && !userGuardado) {
+    let esAdmin = false;
+    if (userGuardado) {
+      try {
+        const u = JSON.parse(userGuardado);
+        if (u.rol === "admin") esAdmin = true;
+      } catch (e) {}
+    }
+
+    if (!esAdmin) {
       router.push("/login");
       return;
     }

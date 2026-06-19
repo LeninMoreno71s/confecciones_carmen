@@ -11,12 +11,20 @@ export default function DashboardPage() {
   const { estaAutenticado } = useAuth();
 
   useEffect(() => {
-    // Protección básica de ruta
+    // Protección estricta: Solo Admin
     const userGuardado = localStorage.getItem("usuario_actual");
-    if (!estaAutenticado && !userGuardado) {
+    let esAdmin = false;
+    if (userGuardado) {
+      try {
+        const u = JSON.parse(userGuardado);
+        if (u.rol === "admin") esAdmin = true;
+      } catch (e) {}
+    }
+
+    if (!esAdmin) {
       router.push("/login");
     }
-  }, [estaAutenticado, router]);
+  }, [router]);
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊", active: true },

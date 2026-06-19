@@ -9,6 +9,7 @@ interface Usuario {
   apellido: string;
   correo: string;
   telefono: string;
+  rol?: string; // Agregado para soportar rol de admin
 }
 
 // Tipo del contexto
@@ -50,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Verificar si el correo ya existe
       const existe = usuariosExistentes.find(
-        (u: any) => u.correo === datos.correo
+        (u: Usuario) => u.correo === datos.correo
       );
       if (existe) {
         return false; // Correo ya registrado
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         correo: datos.correo,
         telefono: datos.telefono,
         contraseña: datos.contraseña,
+        rol: "cliente", // Por defecto los que se registran son clientes
       };
 
       // Guardar en localStorage
@@ -88,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       const usuarioEncontrado = usuariosExistentes.find(
-        (u: any) => u.correo === correo && u.contraseña === contraseña
+        (u: Usuario & { contraseña?: string }) => u.correo === correo && u.contraseña === contraseña
       );
 
       if (usuarioEncontrado) {
