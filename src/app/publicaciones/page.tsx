@@ -57,7 +57,12 @@ export default function PublicacionesPage() {
     <div style={{ padding: "2rem" }}>
       <h1>📰 Administración de Publicaciones</h1>
 
-      <div style={{ marginBottom: "1rem", marginTop: "1.5rem" }}>
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", marginTop: "1.5rem" }}>
+        <Link href="/dashboard">
+          <button style={{ padding: "0.5rem 1rem", background: "#6c757d", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>
+            ⬅️ Volver al Dashboard
+          </button>
+        </Link>
         <Link href="/publicaciones/nuevo">
           <button style={{ padding: "0.5rem 1rem", background: "#2b7a2b", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>
             ➕ Crear Publicación

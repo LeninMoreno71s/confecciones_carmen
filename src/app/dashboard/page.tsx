@@ -8,10 +8,11 @@ export default function DashboardPage() {
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊", active: true },
-   { href: "/productos", label: "Productos", icon: "👗", active: false },
+    { href: "/productos", label: "Productos", icon: "👗", active: false },
     { href: "/pedidos", label: "Pedidos", icon: "📦", active: false },
     { href: "/citas", label: "Citas", icon: "📅", active: false },
     { href: "/usuarios", label: "Usuarios", icon: "👥", active: false },
+    { href: "/publicaciones", label: "Publicaciones", icon: "📰", active: false },
   ];
 
   const stats = [
@@ -172,6 +173,9 @@ export default function DashboardPage() {
           </Link>
           <Link href="/citas" className="btn btn-outline">
             📅 Agendar Cita
+          </Link>
+          <Link href="/publicaciones/nuevo" className="btn btn-outline">
+            📝 Nueva Publicación
           </Link>
         </div>
       </main>

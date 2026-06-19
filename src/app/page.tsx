@@ -442,7 +442,7 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "2rem" }}>
             {/* Renderizamos el componente reutilizable mapeando el estado de publicaciones reales */}
             {publicaciones.length > 0 ? (
               publicaciones.map((pub) => (
