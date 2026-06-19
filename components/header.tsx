@@ -2,7 +2,23 @@
 
 import Link from "next/link";
 import { useAuth } from "../src/app/context/AuthContext";
+import type { CSSProperties } from "react";
 
+const botonVerde: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0.5rem",
+  padding: "0.85rem 2rem",
+  background: "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
+  color: "white",
+  border: "none",
+  borderRadius: "12px",
+  fontSize: "1rem",
+  fontWeight: 600,
+  textDecoration: "none",
+  boxShadow: "0 4px 16px rgba(43, 122, 43, 0.3)",
+  transition: "transform 0.2s",
+};
 export default function Header() {
   const { usuario, estaAutenticado, cerrarSesion } = useAuth();
 
@@ -80,6 +96,9 @@ export default function Header() {
                 {usuario.nombre} {usuario.apellido}
               </span>
             </div>
+            <Link href="/carrito" style={botonVerde}>
+                  🛒 Ver Carrito
+                </Link>
 
             {/* Botón Panel Admin (solo si es admin) */}
             {usuario.rol === "admin" && (

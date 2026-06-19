@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCitas } from "../hooks/useCitas";
 import { Cita } from "../../../types/cita";
+import { useAuth } from "../context/AuthContext";
 
 export default function CitasAdminPage() {
   const router = useRouter();
@@ -76,6 +77,24 @@ export default function CitasAdminPage() {
         <p style={{ color: "#6c757d", marginBottom: "2rem" }}>
           Administra las citas solicitadas por los clientes
         </p>
+        {/* Botón para volver al panel admin */}
+
+        <button
+          onClick={() => router.push("/dashboard")}
+          style={{
+            marginTop: "2rem",
+            padding: "0.6rem 1.2rem",
+            backgroundColor: "#3FA572",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
+        >
+          ⬅️ Volver al Panel Admin
+        </button>
+
 
         {/* TARJETAS DE ESTADÍSTICAS */}
         <div

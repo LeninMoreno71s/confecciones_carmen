@@ -10,27 +10,38 @@ export default function DashboardPage() {
   const { usuario, estaAutenticado, cerrarSesion } = useAuth();
   const router = useRouter();
 
+  const [productos, setProductos] = useState<any[]>([]);
+  const [pedidos, setPedidos] = useState<any[]>([]);
+  const [citas, setCitas] = useState<any[]>([]);
+
   // Protección de acceso solo para admin
   useEffect(() => {
     if (!estaAutenticado || usuario?.rol !== "admin") {
       router.push("/login");
     }
+
+    const prodData = localStorage.getItem("productos");
+    const pedData = localStorage.getItem("pedidos");
+    const citasData = localStorage.getItem("citas");
+
+    if (prodData) setProductos(JSON.parse(prodData));
+    if (pedData) setPedidos(JSON.parse(pedData));
+    if (citasData) setCitas(JSON.parse(citasData));
   }, [estaAutenticado, usuario, router]);
+
+  // Estadísticas dinámicas
+  const stats = [
+    { label: "Productos", value: productos.length, icon: "👗", color: "#2b7a2b" },
+    { label: "Pedidos Pendientes", value: pedidos.filter(p => p.estado === "Pendiente").length, icon: "📦", color: "#C4A35A" },
+    { label: "Citas Hoy", value: citas.filter(c => new Date(c.fecha).toDateString() === new Date().toDateString()).length, icon: "📅", color: "#8B3A4A" },
+  ];
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊", active: true },
     { href: "/productos", label: "Productos", icon: "👗", active: false },
     { href: "/pedidos", label: "Pedidos", icon: "📦", active: false },
     { href: "/citas", label: "Citas", icon: "📅", active: false },
-    { href: "/usuarios", label: "Usuarios", icon: "👥", active: false },
     { href: "/publicaciones", label: "Publicaciones", icon: "📰", active: false },
-  ];
-
-  const stats = [
-    { label: "Productos", value: "24", icon: "👗", color: "#2b7a2b" },
-    { label: "Pedidos Pendientes", value: "8", icon: "📦", color: "#C4A35A" },
-    { label: "Citas Hoy", value: "5", icon: "📅", color: "#8B3A4A" },
-    { label: "Usuarios", value: "12", icon: "👥", color: "#5B7B9A" },
   ];
 
   return (
@@ -59,14 +70,7 @@ export default function DashboardPage() {
         </nav>
 
         {/* Botón de cerrar sesión */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "1.5rem",
-            left: "1.5rem",
-            right: "1.5rem",
-          }}
-        >
+        <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem", right: "1.5rem" }}>
           <button
             onClick={() => {
               cerrarSesion();
@@ -94,28 +98,6 @@ export default function DashboardPage() {
 
       {/* Contenido principal */}
       <main className="main-content">
-        {/* Botón hamburguesa móvil */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="mobile-menu-btn"
-          style={{
-            display: "none",
-            position: "fixed",
-            top: "1rem",
-            left: "1rem",
-            zIndex: 200,
-            background: "var(--primary)",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            padding: "0.5rem",
-            cursor: "pointer",
-            fontSize: "1.5rem",
-          }}
-        >
-          ☰
-        </button>
-
         {/* Top Bar */}
         <div className="top-bar">
           <h1>📊 Dashboard</h1>
@@ -123,9 +105,7 @@ export default function DashboardPage() {
             <span style={{ fontSize: "0.9rem", color: "var(--gray-700)" }}>
               {usuario?.nombre} {usuario?.apellido} ({usuario?.rol})
             </span>
-            <div className="avatar">
-              {usuario?.nombre?.charAt(0) || "A"}
-            </div>
+            <div className="avatar">{usuario?.nombre?.charAt(0) || "A"}</div>
           </div>
         </div>
 
@@ -151,22 +131,27 @@ export default function DashboardPage() {
                 <tr>
                   <th>ID</th>
                   <th>Cliente</th>
-                  <th>Producto</th>
+                  <th>Productos</th>
                   <th>Fecha</th>
                   <th>Estado</th>
                 </tr>
               </thead>
               <tbody>
-                {/* Aquí deberías mapear pedidos reales desde localStorage */}
-                <tr>
-                  <td>#001</td>
-                  <td>María García</td>
-                  <td>Traje de Oso Místico</td>
-                  <td>15/06/2026</td>
-                  <td>
-                    <span className="badge badge-warning">Pendiente</span>
-                  </td>
-                </tr>
+                {pedidos.slice(-5).map((p) => (
+                  <tr key={p.id}>
+                    <td>#{p.id}</td>
+                    <td>{p.cliente}</td>
+                    <td>
+                      {p.productos.map((prod: any) => `${prod.name} x${prod.cantidad}`).join(", ")}
+                    </td>
+                    <td>{p.fecha}</td>
+                    <td>
+                      <span className={`badge ${p.estado === "Pendiente" ? "badge-warning" : "badge-success"}`}>
+                        {p.estado}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -174,32 +159,13 @@ export default function DashboardPage() {
 
         {/* Acciones rápidas */}
         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-          <Link href="/productos" className="btn btn-primary">
-            ➕ Añadir Producto
-          </Link>
-          <Link href="/pedidos" className="btn btn-secondary">
-            📦 Nuevo Pedido
-          </Link>
-          <Link href="/citas" className="btn btn-outline">
-            📅 Citas agendadas
-          </Link>
-          <Link href="/publicaciones/nuevo" className="btn btn-outline">
-            📝 Nueva Publicación
-          </Link>
-          <Link href="/" className="btn btn-success">
-            🏠 Ir a la Página Principal
-          </Link>
+          <Link href="/productos" className="btn btn-primary">➕ Añadir Producto</Link>
+          <Link href="/pedidos" className="btn btn-secondary">📦 Nuevo Pedido</Link>
+          <Link href="/citas" className="btn btn-outline">📅 Citas agendadas</Link>
+          <Link href="/publicaciones/nuevo" className="btn btn-outline">📝 Nueva Publicación</Link>
+          <Link href="/" className="btn btn-success">🏠 Ir a la Página Principal</Link>
         </div>
       </main>
-
-      {/* Estilos para botón móvil */}
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .mobile-menu-btn {
-            display: block !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

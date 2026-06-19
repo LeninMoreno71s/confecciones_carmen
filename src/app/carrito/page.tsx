@@ -30,7 +30,7 @@ export default function CarritoPage() {
           ? { ...item, cantidad: item.cantidad - 1 }
           : item
       )
-      .filter((item) => item.cantidad > 0); // elimina si llega a 0
+      .filter((item) => item.cantidad > 0);
     actualizarCarrito(actualizado);
   };
 
@@ -38,32 +38,37 @@ export default function CarritoPage() {
     carrito.reduce((acc, item) => acc + item.costo * item.cantidad, 0);
 
   const finalizarCompra = () => {
-  if (carrito.length === 0) return;
+    if (carrito.length === 0) return;
 
-  const usuarioActual = JSON.parse(localStorage.getItem("usuario_actual") || "{}");
+    const usuarioActual = JSON.parse(localStorage.getItem("usuario_actual") || "{}");
 
-  const nuevoPedido = {
+    const nuevoPedido = {
     id: Date.now(),
-    cliente: `${usuarioActual.nombre} ${usuarioActual.apellido}` || usuarioActual.correo || "Invitado",
+    cliente:
+      `${usuarioActual.nombre || ""} ${usuarioActual.apellido || ""}`.trim() ||
+      usuarioActual.correo ||
+      "Invitado",
     productos: carrito.map((item) => ({
-      nombre: item.name,
+      id: item.id,
+      name: item.name,   // ✅ usar "name"
       cantidad: item.cantidad,
+      costo: item.costo,
     })),
     fecha: new Date().toLocaleString(),
     estado: "Pendiente",
   };
 
-  const data = localStorage.getItem("pedidos");
-  const pedidos = data ? JSON.parse(data) : [];
-  pedidos.push(nuevoPedido);
-  localStorage.setItem("pedidos", JSON.stringify(pedidos));
 
-  localStorage.removeItem("carrito");
-  setCarrito([]);
+    const data = localStorage.getItem("pedidos");
+    const pedidos = data ? JSON.parse(data) : [];
+    pedidos.push(nuevoPedido);
+    localStorage.setItem("pedidos", JSON.stringify(pedidos));
 
-  alert("✅ Compra finalizada. El pedido fue generado.");
+    localStorage.removeItem("carrito");
+    setCarrito([]);
+
+    alert("✅ Compra finalizada. El pedido fue generado.");
   };
-
 
   return (
     <div
@@ -105,7 +110,6 @@ export default function CarritoPage() {
             <p>Precio unitario: ${item.costo}</p>
             <p>Total: ${item.costo * item.cantidad}</p>
 
-            {/* Botones de cantidad */}
             <div style={{ marginTop: "0.5rem" }}>
               <button
                 onClick={() => reducirCantidad(item.id)}
@@ -139,7 +143,6 @@ export default function CarritoPage() {
         ))
       )}
 
-      {/* Total general */}
       {carrito.length > 0 && (
         <>
           <div
@@ -155,7 +158,6 @@ export default function CarritoPage() {
           >
             Total a pagar: ${calcularTotal()}
           </div>
-          {/* JSX del botón de compra */}
           <button
             onClick={finalizarCompra}
             style={{
@@ -174,7 +176,6 @@ export default function CarritoPage() {
         </>
       )}
 
-      {/* Botón para volver a la página principal */}
       <Link href="/">
         <button
           style={{

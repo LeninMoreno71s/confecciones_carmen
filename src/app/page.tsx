@@ -31,9 +31,11 @@ const agregarAlCarrito = (producto: CartaProducto) => {
 export default function HomePage() {
   const [selectedPub, setSelectedPub] = useState<any>(null);
   const [publicaciones, setPublicaciones] = useState<any[]>([]);
+  const [productos, setProductos] = useState<CartaProducto[]>([]); // ✅ nuevo estado para productos
   const { estaAutenticado } = useAuth();
 
   useEffect(() => {
+    // Cargar publicaciones
     const pubGuardadas = localStorage.getItem("publicaciones");
     if (pubGuardadas && JSON.parse(pubGuardadas).length > 0) {
       setPublicaciones(JSON.parse(pubGuardadas));
@@ -44,17 +46,25 @@ export default function HomePage() {
           imagen: "/oso_traje.webp",
           titulo: "Nueva Colección de Disfraces",
           fecha: "15/06/2026",
-          descripcion: "Estamos emocionados de anunciar nuestra nueva colección de disfraces para esta temporada. Hemos trabajado duro para traer los mejores diseños y materiales. ¡Ven a verlos! Tendremos promociones especiales para los primeros compradores."
+          descripcion:
+            "Estamos emocionados de anunciar nuestra nueva colección de disfraces para esta temporada. Hemos trabajado duro para traer los mejores diseños y materiales. ¡Ven a verlos! Tendremos promociones especiales para los primeros compradores.",
         },
         {
           id: 2,
           imagen: "/traje_caporal.jpg",
           titulo: "Taller de Costura Básica",
           fecha: "10/06/2026",
-          descripcion: "El próximo mes abriremos un taller de costura básica para todos los interesados en aprender este hermoso arte. Las inscripciones ya están abiertas. No se requiere experiencia previa, solo ganas de aprender."
-        }
+          descripcion:
+            "El próximo mes abriremos un taller de costura básica para todos los interesados en aprender este hermoso arte. Las inscripciones ya están abiertas. No se requiere experiencia previa, solo ganas de aprender.",
+        },
       ];
       setPublicaciones(publicacionesMock);
+    }
+
+    // ✅ Cargar productos creados por el admin
+    const data = localStorage.getItem("productos");
+    if (data) {
+      setProductos(JSON.parse(data));
     }
   }, []);
 
@@ -66,7 +76,8 @@ export default function HomePage() {
       {/* HERO SECTION */}
       <section
         style={{
-          background: "linear-gradient(135deg, #F5F0E8 0%, #E8D5B7 50%, #D4C4A8 100%)",
+          background:
+            "linear-gradient(135deg, #F5F0E8 0%, #E8D5B7 50%, #D4C4A8 100%)",
           minHeight: "80vh",
           display: "flex",
           flexDirection: "column",
@@ -88,31 +99,6 @@ export default function HomePage() {
             width: "100%",
             height: "auto",
             marginBottom: "1rem",
-          }}
-        />
-        {/* Fondo decorativo */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-50px",
-            right: "-50px",
-            width: "300px",
-            height: "300px",
-            borderRadius: "50%",
-            background: "rgba(139, 58, 74, 0.1)",
-            zIndex: 0,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-80px",
-            left: "-80px",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "rgba(43, 122, 43, 0.08)",
-            zIndex: 0,
           }}
         />
 
@@ -151,8 +137,7 @@ export default function HomePage() {
               lineHeight: 1.2,
             }}
           >
-            Confecciones{" "}
-            <span style={{ color: "#8B3A4A" }}>Carmen</span>
+            Confecciones <span style={{ color: "#8B3A4A" }}>Carmen</span>
           </h1>
 
           <p
@@ -178,12 +163,10 @@ export default function HomePage() {
               flexWrap: "wrap",
             }}
           >
-            {/* Ver Productos - Siempre visible */}
             <Link href="#productos" style={botonVerde}>
               👗 Ver Productos
             </Link>
 
-            {/* SI NO ESTÁ AUTENTICADO: mostrar Crear Cuenta + Iniciar Sesión */}
             {!estaAutenticado && (
               <>
                 <Link href="/registro" style={botonBordeBordo}>
@@ -195,47 +178,22 @@ export default function HomePage() {
               </>
             )}
 
-            {/* SI ESTÁ AUTENTICADO: mostrar Agendar Cita + Ver Carrito */}
             {estaAutenticado && (
               <>
                 <Link href="/agendar-cita" style={botonBordeBordo}>
                   📅 Agendar Cita
                 </Link>
-                <Link href="/carrito" style={botonVerde}>
-                  🛒 Ver Carrito
-                </Link>
+                
               </>
             )}
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "2rem",
-            animation: "bounce 2s infinite",
-          }}
-        >
-          <span style={{ fontSize: "1.5rem", opacity: 0.5 }}>↓</span>
-        </div>
       </section>
 
       {/* SECCIÓN DE PRODUCTOS */}
-      <section
-        id="productos"
-        style={{
-          padding: "4rem 2rem",
-          background: "white",
-        }}
-      >
+      <section id="productos" style={{ padding: "4rem 2rem", background: "white" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div
-            style={{
-              textAlign: "center",
-              marginBottom: "3rem",
-            }}
-          >
+          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
             <span
               style={{
                 display: "inline-block",
@@ -264,6 +222,9 @@ export default function HomePage() {
               Cada prenda es elaborada con dedicación y los mejores materiales
             </p>
           </div>
+
+          {/* ✅ Aquí luego va la parte 2 con el grid dinámico */}
+
 
           {/* Grid de productos */}
           <div
@@ -327,6 +288,31 @@ export default function HomePage() {
               stock={1}
               onAddToCart={agregarAlCarrito}
             />
+            
+            {productos.length === 0 ? (
+              <p
+                style={{
+                  textAlign: "center",
+                  color: "#6c757d",
+                  gridColumn: "1 / -1",
+                }}
+              >
+                No hay productos disponibles aún.
+              </p>
+            ) : (
+              productos.map((p) => (
+                <Carta
+                  key={p.id}
+                  id={p.id}
+                  image={p.image}
+                  name={p.name}
+                  descripcion={p.descripcion}
+                  costo={p.costo}
+                  stock={p.stock}
+                  onAddToCart={() => agregarAlCarrito(p)}
+                />
+              ))
+            )}
           </div>
         </div>
       </section>

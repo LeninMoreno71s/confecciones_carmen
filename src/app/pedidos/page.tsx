@@ -2,11 +2,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Interfaz de producto dentro del pedido
+interface ProductoPedido {
+  id: number;
+  name: string;
+  cantidad: number;
+  costo: number; // ✅ ahora incluye costo
+}
+
 // Interfaz de pedido
 interface Pedido {
   id: number;
   cliente: string;
-  producto: string;
+  productos: ProductoPedido[];
   fecha: string;
   estado: string;
 }
@@ -33,17 +41,19 @@ export default function PedidosPage() {
     guardarPedidos(pedidos.filter((p) => p.id !== id));
   };
 
+  // Calcular total de un pedido
+  const calcularTotalPedido = (p: Pedido) => {
+    return p.productos.reduce((acc, prod) => acc + prod.costo * prod.cantidad, 0);
+  };
+
   // Buscar pedidos por cliente o producto
   const resultados = pedidos.filter(
     (p) =>
       p.cliente.toLowerCase().includes(busqueda.toLowerCase()) ||
-      p.producto.toLowerCase().includes(busqueda.toLowerCase())
+      p.productos.some((prod) =>
+        prod.name.toLowerCase().includes(busqueda.toLowerCase())
+      )
   );
-
-  useEffect(() => {
-  const data = localStorage.getItem("pedidos");
-  if (data) setPedidos(JSON.parse(data));
-  }, []);
 
   return (
     <div style={{ padding: "2rem", minHeight: "100vh", backgroundColor: "#fdfdfd" }}>
@@ -90,14 +100,26 @@ export default function PedidosPage() {
             >
               <h3 style={{ color: "#800020" }}>Pedido #{p.id}</h3>
               <p><strong>Cliente:</strong> {p.cliente}</p>
-              <p><strong>Producto:</strong> {p.producto}</p>
               <p><strong>Fecha:</strong> {p.fecha}</p>
               <p><strong>Estado:</strong> {p.estado}</p>
+
+              <ul style={{ marginTop: "0.5rem", paddingLeft: "1.2rem" }}>
+                {p.productos.map((prod, index) => (
+                  <li key={`${prod.id}-${index}`}>
+                    {prod.name} — x{prod.cantidad} (${prod.costo} c/u)
+                  </li>
+                ))}
+              </ul>
+
+              {/* ✅ Mostrar total */}
+              <p style={{ marginTop: "0.5rem", fontWeight: 700, color: "#800020" }}>
+                Total a pagar: ${calcularTotalPedido(p)}
+              </p>
 
               <button
                 onClick={() => eliminarPedido(p.id)}
                 style={{
-                  marginTop: "0.5rem",
+                  marginTop: "0.8rem",
                   padding: "0.4rem 0.8rem",
                   backgroundColor: "#800020",
                   color: "white",
@@ -109,27 +131,41 @@ export default function PedidosPage() {
                 🗑️ Eliminar
               </button>
             </div>
-            
           ))}
         </div>
       )}
 
-      {/* Botón para volver */}
-      <button
-        onClick={() => router.push("/")}
-        style={{
-          marginTop: "2rem",
-          padding: "0.6rem 1.2rem",
-          backgroundColor: "#3FA572",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-          fontWeight: 600,
-        }}
-      >
-        ⬅️ Volver a la página principal
-      </button>
+      {/* Botones para volver */}
+      <div style={{ marginTop: "2rem", display: "flex", gap: "1rem" }}>
+        <button
+          onClick={() => router.push("/")}
+          style={{
+            padding: "0.6rem 1.2rem",
+            backgroundColor: "#3FA572",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
+        >
+          ⬅️ Volver a la página principal
+        </button>
+        <button
+          onClick={() => router.push("/dashboard")}
+          style={{
+            padding: "0.6rem 1.2rem",
+            backgroundColor: "#3FA572",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
+        >
+          ⬅️ Volver al Panel Admin
+        </button>
+      </div>
     </div>
   );
 }
