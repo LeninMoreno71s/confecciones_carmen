@@ -32,7 +32,8 @@ export default function LoginPage() {
       };
       localStorage.setItem("usuario_actual", JSON.stringify(adminData));
       setCargando(false);
-      router.push("/dashboard");
+      // Forzamos la recarga completa para que AuthContext lea el localStorage nuevamente
+      window.location.href = "/dashboard";
       return;
     }
 

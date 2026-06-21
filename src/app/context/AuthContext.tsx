@@ -16,6 +16,7 @@ interface Usuario {
 interface AuthContextType {
   usuario: Usuario | null;
   estaAutenticado: boolean;
+  cargandoAuth: boolean;
   registrar: (datos: Omit<Usuario, "id"> & { contraseña: string }) => boolean;
   iniciarSesion: (correo: string, contraseña: string) => boolean;
   cerrarSesion: () => void;
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [estaAutenticado, setEstaAutenticado] = useState(false);
+  const [cargandoAuth, setCargandoAuth] = useState(true);
 
   // Cargar usuario del localStorage al iniciar
   useEffect(() => {
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Error al cargar usuario:", error);
       }
     }
+    setCargandoAuth(false);
   }, []);
 
   // Registrar nuevo usuario
@@ -124,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         usuario,
         estaAutenticado,
+        cargandoAuth,
         registrar,
         iniciarSesion,
         cerrarSesion,

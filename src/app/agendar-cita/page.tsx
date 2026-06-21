@@ -9,7 +9,7 @@ import Header from "../../../components/header";
 
 export default function AgendarCitaPage() {
   const router = useRouter();
-  const { usuario, estaAutenticado } = useAuth();
+  const { usuario, estaAutenticado, cargandoAuth } = useAuth();
   const {
     agendarCita,
     generarHorariosDisponibles,
@@ -26,10 +26,10 @@ export default function AgendarCitaPage() {
 
   // Redirigir si no está autenticado
   useEffect(() => {
-    if (!estaAutenticado) {
+    if (!cargandoAuth && !estaAutenticado) {
       router.push("/login?redirect=agendar-cita");
     }
-  }, [estaAutenticado, router]);
+  }, [estaAutenticado, router, cargandoAuth]);
 
   // Actualizar horarios cuando cambia la fecha
   useEffect(() => {

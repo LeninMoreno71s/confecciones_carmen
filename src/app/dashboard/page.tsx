@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { usuario, estaAutenticado, cerrarSesion } = useAuth();
+  const { usuario, estaAutenticado, cerrarSesion, cargandoAuth } = useAuth();
   const router = useRouter();
 
   const [productos, setProductos] = useState<any[]>([]);
@@ -16,7 +16,7 @@ export default function DashboardPage() {
 
   // Protección de acceso solo para admin
   useEffect(() => {
-    if (!estaAutenticado || usuario?.rol !== "admin") {
+    if (!cargandoAuth && (!estaAutenticado || usuario?.rol !== "admin")) {
       router.push("/login");
     }
 
@@ -27,7 +27,7 @@ export default function DashboardPage() {
     if (prodData) setProductos(JSON.parse(prodData));
     if (pedData) setPedidos(JSON.parse(pedData));
     if (citasData) setCitas(JSON.parse(citasData));
-  }, [estaAutenticado, usuario, router]);
+  }, [estaAutenticado, usuario, router, cargandoAuth]);
 
   // Estadísticas dinámicas
   const stats = [
