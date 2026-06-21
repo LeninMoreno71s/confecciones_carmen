@@ -15,7 +15,7 @@ export interface Publicacion {
 export default function FormularioPublicacion() {
   const { id } = useParams();
   const router = useRouter();
-  const { estaAutenticado } = useAuth();
+  const { usuario, estaAutenticado, cargandoAuth } = useAuth();
   
   const [publicacion, setPublicacion] = useState<Partial<Publicacion>>({
     titulo: "",
@@ -27,16 +27,7 @@ export default function FormularioPublicacion() {
 
   useEffect(() => {
     // Protección estricta: Solo Admin
-    const userGuardado = localStorage.getItem("usuario_actual");
-    let esAdmin = false;
-    if (userGuardado) {
-      try {
-        const u = JSON.parse(userGuardado);
-        if (u.rol === "admin") esAdmin = true;
-      } catch (e) {}
-    }
-
-    if (!esAdmin) {
+    if (!cargandoAuth && (!estaAutenticado || usuario?.rol !== "admin")) {
       router.push("/login");
       return;
     }
@@ -52,7 +43,7 @@ export default function FormularioPublicacion() {
         }
       }
     }
-  }, [id, router]);
+  }, [id, router, cargandoAuth, estaAutenticado, usuario]);
 
   const guardar = () => {
     setError("");

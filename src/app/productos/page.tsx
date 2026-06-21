@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function ProductosPage() {
   const router = useRouter();
-  const { usuario, estaAutenticado } = useAuth();
+  const { usuario, estaAutenticado, cargandoAuth } = useAuth();
   const [productos, setProductos] = useState<CartaProducto[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [nuevo, setNuevo] = useState<CartaProducto>({
@@ -80,8 +80,7 @@ export default function ProductosPage() {
   ];
 
   useEffect(() => {
-    const userGuardado = localStorage.getItem("usuario_actual");
-    if (!estaAutenticado && !userGuardado) {
+    if (!cargandoAuth && (!estaAutenticado || usuario?.rol !== "admin")) {
       router.push("/login");
       return;
     }

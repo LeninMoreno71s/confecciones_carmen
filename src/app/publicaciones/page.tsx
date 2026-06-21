@@ -15,22 +15,13 @@ export interface Publicacion {
 
 export default function PublicacionesPage() {
   const router = useRouter();
-  const { estaAutenticado } = useAuth();
+  const { usuario, estaAutenticado, cargandoAuth } = useAuth();
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
   const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
     // Protección estricta: Solo Admin
-    const userGuardado = localStorage.getItem("usuario_actual");
-    let esAdmin = false;
-    if (userGuardado) {
-      try {
-        const u = JSON.parse(userGuardado);
-        if (u.rol === "admin") esAdmin = true;
-      } catch (e) {}
-    }
-
-    if (!esAdmin) {
+    if (!cargandoAuth && (!estaAutenticado || usuario?.rol !== "admin")) {
       router.push("/login");
       return;
     }
@@ -47,7 +38,7 @@ export default function PublicacionesPage() {
       setPublicaciones(iniciales);
       localStorage.setItem("publicaciones", JSON.stringify(iniciales));
     }
-  }, [router]);
+  }, [router, cargandoAuth, estaAutenticado, usuario]);
 
   // Eliminar
   const eliminarPublicacion = (id: string) => {

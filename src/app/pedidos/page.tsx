@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { useAuth } from "../context/AuthContext";
 // Interfaz de producto dentro del pedido
 interface ProductoPedido {
   id: number;
@@ -21,8 +21,16 @@ interface Pedido {
 
 export default function PedidosPage() {
   const router = useRouter();
+  const { usuario, estaAutenticado, cargandoAuth } = useAuth();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [busqueda, setBusqueda] = useState("");
+
+  // Protección de admin
+  useEffect(() => {
+    if (!cargandoAuth && (!estaAutenticado || usuario?.rol !== "admin")) {
+      router.push("/login");
+    }
+  }, [cargandoAuth, estaAutenticado, usuario, router]);
 
   // Cargar pedidos desde localStorage
   useEffect(() => {

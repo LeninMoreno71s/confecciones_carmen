@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCitas } from "../hooks/useCitas";
 import { Cita } from "../../../types/cita";
@@ -8,7 +8,15 @@ import { useAuth } from "../context/AuthContext";
 
 export default function CitasAdminPage() {
   const router = useRouter();
+  const { usuario, estaAutenticado, cargandoAuth } = useAuth();
   const { obtenerTodasCitas, aceptarCita, rechazarCita } = useCitas();
+
+  useEffect(() => {
+    if (!cargandoAuth && (!estaAutenticado || usuario?.rol !== "admin")) {
+      router.push("/login");
+    }
+  }, [cargandoAuth, estaAutenticado, usuario, router]);
+
   const [comentario, setComentario] = useState("");
   const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
   const [accionPendiente, setAccionPendiente] = useState<"aceptar" | "rechazar" | null>(null);
