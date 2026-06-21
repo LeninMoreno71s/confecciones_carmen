@@ -110,7 +110,9 @@ export default function ProductosPage() {
   };
 
   const eliminarProducto = (id: number) => {
-    guardarProductos(productos.filter((p) => p.id !== id));
+    if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
+      guardarProductos(productos.filter((p) => p.id !== id));
+    }
   };
 
   const modificarProducto = (id: number, cambios: Partial<CartaProducto>) => {

@@ -38,7 +38,9 @@ export default function PedidosPage() {
 
   // Eliminar pedido
   const eliminarPedido = (id: number) => {
-    guardarPedidos(pedidos.filter((p) => p.id !== id));
+    if (window.confirm("¿Estás seguro de que deseas eliminar este pedido?")) {
+      guardarPedidos(pedidos.filter((p) => p.id !== id));
+    }
   };
 
   // Calcular total de un pedido
