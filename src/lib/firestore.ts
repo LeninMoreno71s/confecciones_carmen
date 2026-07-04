@@ -1,4 +1,3 @@
-// src/lib/firestore.ts
 import { db } from "./firebase";
 import {
   collection,
@@ -15,37 +14,11 @@ import {
 } from "firebase/firestore";
 
 // =========================================================================
-// FUNCIONES GENÉRICAS CRUD
+// FUNCIONES CRUD GENÉRICAS
 // =========================================================================
 
 /**
- * Crear o sobrescribir un documento
- * @param coleccion - Nombre de la colección
- * @param id - ID del documento
- * @param datos - Datos a guardar
- */
-export async function guardarDocumento(
-  coleccion: string,
-  id: string,
-  datos: any
-) {
-  try {
-    const docRef = doc(db, coleccion, id);
-    await setDoc(docRef, {
-      ...datos,
-      fechaActualizacion: Timestamp.now(),
-    });
-    return { exito: true };
-  } catch (error) {
-    console.error(`Error al guardar en ${coleccion}:`, error);
-    return { exito: false, error };
-  }
-}
-
-/**
  * Agregar un documento con ID automático
- * @param coleccion - Nombre de la colección
- * @param datos - Datos a guardar
  */
 export async function agregarDocumento(coleccion: string, datos: any) {
   try {
@@ -62,9 +35,24 @@ export async function agregarDocumento(coleccion: string, datos: any) {
 }
 
 /**
+ * Guardar documento con ID específico
+ */
+export async function guardarDocumento(coleccion: string, id: string, datos: any) {
+  try {
+    const docRef = doc(db, coleccion, id);
+    await setDoc(docRef, {
+      ...datos,
+      fechaActualizacion: Timestamp.now(),
+    });
+    return { exito: true };
+  } catch (error) {
+    console.error(`Error al guardar en ${coleccion}:`, error);
+    return { exito: false, error };
+  }
+}
+
+/**
  * Obtener un documento por ID
- * @param coleccion - Nombre de la colección
- * @param id - ID del documento
  */
 export async function obtenerDocumento(coleccion: string, id: string) {
   try {
@@ -73,7 +61,7 @@ export async function obtenerDocumento(coleccion: string, id: string) {
     if (docSnap.exists()) {
       return { exito: true, datos: { id: docSnap.id, ...docSnap.data() } };
     }
-    return { exito: false, error: "Documento no encontrado" };
+    return { exito: false, error: "No encontrado" };
   } catch (error) {
     console.error(`Error al obtener de ${coleccion}:`, error);
     return { exito: false, error };
@@ -82,7 +70,6 @@ export async function obtenerDocumento(coleccion: string, id: string) {
 
 /**
  * Obtener todos los documentos de una colección
- * @param coleccion - Nombre de la colección
  */
 export async function obtenerTodos(coleccion: string) {
   try {
@@ -100,15 +87,8 @@ export async function obtenerTodos(coleccion: string) {
 
 /**
  * Actualizar un documento
- * @param coleccion - Nombre de la colección
- * @param id - ID del documento
- * @param datos - Datos a actualizar
  */
-export async function actualizarDocumento(
-  coleccion: string,
-  id: string,
-  datos: any
-) {
+export async function actualizarDocumento(coleccion: string, id: string, datos: any) {
   try {
     const docRef = doc(db, coleccion, id);
     await updateDoc(docRef, {
@@ -124,8 +104,6 @@ export async function actualizarDocumento(
 
 /**
  * Eliminar un documento
- * @param coleccion - Nombre de la colección
- * @param id - ID del documento
  */
 export async function eliminarDocumento(coleccion: string, id: string) {
   try {
@@ -140,15 +118,8 @@ export async function eliminarDocumento(coleccion: string, id: string) {
 
 /**
  * Buscar documentos por campo
- * @param coleccion - Nombre de la colección
- * @param campo - Campo a buscar
- * @param valor - Valor a buscar
  */
-export async function buscarPorCampo(
-  coleccion: string,
-  campo: string,
-  valor: any
-) {
+export async function buscarPorCampo(coleccion: string, campo: string, valor: any) {
   try {
     const q = query(collection(db, coleccion), where(campo, "==", valor));
     const querySnapshot = await getDocs(q);

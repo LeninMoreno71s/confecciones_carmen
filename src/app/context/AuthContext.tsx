@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { agregarDocumento, buscarPorCampo, obtenerTodos } from "../../lib/firestore";
 
 // Tipo de usuario
 interface Usuario {
@@ -9,7 +10,7 @@ interface Usuario {
   apellido: string;
   correo: string;
   telefono: string;
-  rol?: string; // Agregado para soportar rol de admin
+  rol?: string;
 }
 
 // Tipo del contexto
@@ -17,8 +18,8 @@ interface AuthContextType {
   usuario: Usuario | null;
   estaAutenticado: boolean;
   cargandoAuth: boolean;
-  registrar: (datos: Omit<Usuario, "id"> & { contraseña: string }) => boolean;
-  iniciarSesion: (correo: string, contraseña: string) => boolean;
+  registrar: (datos: Omit<Usuario, "id"> & { contraseña: string }) => Promise<boolean>;
+  iniciarSesion: (correo: string, contraseña: string) => Promise<boolean>;
   cerrarSesion: () => void;
 }
 
@@ -29,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [estaAutenticado, setEstaAutenticado] = useState(false);
   const [cargandoAuth, setCargandoAuth] = useState(true);
 
-  // Cargar usuario del localStorage al iniciar
+  // Cargar usuario del localStorage al iniciar (mantenemos esto por ahora)
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem("usuario_actual");
     if (usuarioGuardado) {
@@ -44,70 +45,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCargandoAuth(false);
   }, []);
 
-  // Registrar nuevo usuario
-  const registrar = (datos: Omit<Usuario, "id"> & { contraseña: string }): boolean => {
+  // Registrar nuevo usuario (AHORA EN FIRESTORE)
+  const registrar = async (datos: Omit<Usuario, "id"> & { contraseña: string }): Promise<boolean> => {
     try {
-      // Obtener usuarios existentes
-      const usuariosExistentes = JSON.parse(
-        localStorage.getItem("usuarios_registrados") || "[]"
-      );
-
       // Verificar si el correo ya existe
-      const existe = usuariosExistentes.find(
-        (u: Usuario) => u.correo === datos.correo
-      );
-      if (existe) {
+      const existe = await buscarPorCampo("usuarios", "correo", datos.correo);
+      if (existe.exito && existe.datos.length > 0) {
         return false; // Correo ya registrado
       }
 
-      // Crear nuevo usuario con ID único
-      const nuevoUsuario: Usuario & { contraseña: string } = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+      // Crear nuevo usuario
+      const nuevoUsuario = {
         nombre: datos.nombre,
         apellido: datos.apellido,
         correo: datos.correo,
         telefono: datos.telefono,
         contraseña: datos.contraseña,
-        rol: "cliente", // Por defecto los que se registran son clientes
+        rol: "cliente",
       };
 
-      // Guardar en localStorage
-      usuariosExistentes.push(nuevoUsuario);
-      localStorage.setItem(
-        "usuarios_registrados",
-        JSON.stringify(usuariosExistentes)
-      );
-
-      return true;
+      const resultado = await agregarDocumento("usuarios", nuevoUsuario);
+      return resultado.exito;
     } catch (error) {
       console.error("Error al registrar:", error);
       return false;
     }
   };
 
-  // Iniciar sesión
-  const iniciarSesion = (correo: string, contraseña: string): boolean => {
+  // Iniciar sesión (AHORA EN FIRESTORE)
+  const iniciarSesion = async (correo: string, contraseña: string): Promise<boolean> => {
     try {
-      const usuariosExistentes = JSON.parse(
-        localStorage.getItem("usuarios_registrados") || "[]"
-      );
-
-      const usuarioEncontrado = usuariosExistentes.find(
-        (u: Usuario & { contraseña?: string }) => u.correo === correo && u.contraseña === contraseña
-      );
-
-      if (usuarioEncontrado) {
-        // Guardar sesión actual (sin contraseña)
-        const { contraseña: _, ...usuarioSinPass } = usuarioEncontrado;
-        setUsuario(usuarioSinPass);
-        setEstaAutenticado(true);
-        localStorage.setItem(
-          "usuario_actual",
-          JSON.stringify(usuarioSinPass)
-        );
-        return true;
+      const resultado = await buscarPorCampo("usuarios", "correo", correo);
+      
+      if (resultado.exito && resultado.datos.length > 0) {
+        const usuarioEncontrado = resultado.datos[0];
+        
+        if (usuarioEncontrado.contraseña === contraseña) {
+          // Guardar sesión (sin contraseña)
+          const { contraseña: _, ...usuarioSinPass } = usuarioEncontrado;
+          setUsuario(usuarioSinPass);
+          setEstaAutenticado(true);
+          localStorage.setItem("usuario_actual", JSON.stringify(usuarioSinPass));
+          return true;
+        }
       }
-
       return false;
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
@@ -115,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Cerrar sesión
+  // Cerrar sesión (sin cambios)
   const cerrarSesion = () => {
     setUsuario(null);
     setEstaAutenticado(false);

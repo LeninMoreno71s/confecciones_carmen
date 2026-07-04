@@ -37,8 +37,9 @@ export default function LoginPage() {
       return;
     }
 
-    // 2. Verificar si es un CLIENTE registrado
-    const resultado = iniciarSesion(email, password);
+
+    const resultado = await iniciarSesion(email, password);
+//                       ↑ AHORA ES ASÍNCRONO (await)
     setCargando(false);
 
     if (resultado) {
