@@ -302,7 +302,7 @@ export default function RegistroPage() {
     };
 
     // Intentar registrar
-    const resultado = registrar(datosSanitizados);
+    const resultado = await registrar(datosSanitizados);
     setCargando(false);
 
     if (resultado) {

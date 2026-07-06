@@ -14,14 +14,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ AGREGAR async AQUÍ
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setCargando(true);
 
     // 1. Verificar si es el ADMINISTRADOR
     if (email === "admin@confeccionescarmen.cl" && password === "admin123") {
-      // Guardar sesión de admin en localStorage
       const adminData = {
         id: "admin-001",
         nombre: "Administrador",
@@ -32,23 +32,21 @@ export default function LoginPage() {
       };
       localStorage.setItem("usuario_actual", JSON.stringify(adminData));
       setCargando(false);
-      // Forzamos la recarga completa para que AuthContext lea el localStorage nuevamente
       window.location.href = "/dashboard";
       return;
     }
 
-
+    // 2. Verificar si es un CLIENTE registrado
     const resultado = await iniciarSesion(email, password);
-//                       ↑ AHORA ES ASÍNCRONO (await)
     setCargando(false);
 
     if (resultado) {
-      // Redirigir a la página principal
       router.push("/?login=exitoso");
     } else {
       setError("Credenciales incorrectas. Verifica tu correo y contraseña.");
     }
   };
+
 
   return (
     <div style={{
