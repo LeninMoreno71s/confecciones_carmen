@@ -13,6 +13,8 @@ export default function ProductosPage() {
   const [productos, setProductos] = useState<CartaProducto[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
+  const [archivo, setArchivo] = useState<File | null>(null);
+  const [subiendo, setSubiendo] = useState(false);
   const [nuevo, setNuevo] = useState<CartaProducto>({
     id: 0,
     image: "",
@@ -63,24 +65,63 @@ export default function ProductosPage() {
     }
   }, [estaAutenticado, usuario, router, cargandoAuth]);
 
-  // Crear producto (Firestore)
+  // Crear producto (Firestore con subida de imagen local)
   const crearProducto = async () => {
+    if (!nuevo.name || !nuevo.categoria) {
+      alert("Por favor ingresa al menos el nombre y la categoría del producto");
+      return;
+    }
+
+    setSubiendo(true);
+    let rutaImagen = nuevo.image || "/oso_traje.webp";
+
+    // Subir archivo a /api/upload si se seleccionó uno
+    if (archivo) {
+      const formData = new FormData();
+      formData.append("file", archivo);
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const dataUpload = await res.json();
+
+        if (dataUpload.success) {
+          rutaImagen = dataUpload.url;
+        } else {
+          alert(dataUpload.error || "Error al subir la imagen");
+          setSubiendo(false);
+          return;
+        }
+      } catch (error) {
+        console.error("Error de conexión al subir la imagen:", error);
+        alert("Error de conexión al subir la imagen");
+        setSubiendo(false);
+        return;
+      }
+    }
+
     const resultado = await agregarDocumento("productos", {
       name: nuevo.name,
       descripcion: nuevo.descripcion,
       categoria: nuevo.categoria,
       costo: Number(nuevo.costo),
       stock: Number(nuevo.stock),
-      image: nuevo.image,
+      image: rutaImagen,
     });
 
     if (resultado.exito) {
       // Agregar a la lista local con el ID de Firestore
-      setProductos([...productos, { ...nuevo, id: resultado.id } as any]);
+      setProductos([...productos, { ...nuevo, image: rutaImagen, id: resultado.id } as any]);
       setNuevo({ id: 0, image: "", name: "", descripcion: "", categoria: "", costo: 0, stock: 0 });
+      setArchivo(null);
+      const inputSelector = document.getElementById("selector-imagen-producto") as HTMLInputElement;
+      if (inputSelector) inputSelector.value = "";
     } else {
       alert("Error al crear el producto");
     }
+    setSubiendo(false);
   };
 
   // Eliminar producto (Firestore)
@@ -145,9 +186,16 @@ export default function ProductosPage() {
       }}>
         <h2 style={{ marginBottom: "1rem", color: "#3FA572" }}>➕ Añadir nuevo producto</h2>
         <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
-          <input type="text" placeholder="Imagen (ruta)" value={nuevo.image}
-            onChange={(e) => setNuevo({ ...nuevo, image: e.target.value })}
-            style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#3FA572" }}>📷 Imagen del Producto:</label>
+            <input
+              id="selector-imagen-producto"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setArchivo(e.target.files?.[0] || null)}
+              style={{ padding: "0.5rem", borderRadius: "8px", border: "1px dashed #3FA572", background: "#f0f8f0", fontSize: "0.85rem" }}
+            />
+          </div>
           <input type="text" placeholder="Nombre" value={nuevo.name}
             onChange={(e) => setNuevo({ ...nuevo, name: e.target.value })}
             style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
@@ -164,11 +212,11 @@ export default function ProductosPage() {
             onChange={(e) => setNuevo({ ...nuevo, stock: Number(e.target.value) })}
             style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
         </div>
-        <button onClick={crearProducto} style={{
-          marginTop: "1rem", padding: "0.6rem 1.2rem", backgroundColor: "#3FA572",
-          color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: 600,
+        <button onClick={crearProducto} disabled={subiendo} style={{
+          marginTop: "1rem", padding: "0.6rem 1.2rem", backgroundColor: subiendo ? "#6c757d" : "#3FA572",
+          color: "white", border: "none", borderRadius: "8px", cursor: subiendo ? "not-allowed" : "pointer", fontWeight: 600,
         }}>
-          ➕ Añadir Producto
+          {subiendo ? "⏳ Subiendo imagen y guardando..." : "➕ Añadir Producto"}
         </button>
       </div>
 
