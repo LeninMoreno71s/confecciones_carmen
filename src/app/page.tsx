@@ -32,56 +32,46 @@ const agregarAlCarrito = (producto: CartaProducto) => {
 export default function HomePage() {
   const [selectedPub, setSelectedPub] = useState<any>(null);
   const [publicaciones, setPublicaciones] = useState<any[]>([]);
-  const [productos, setProductos] = useState<CartaProducto[]>([]); // ✅ nuevo estado para productos
+  const [productos, setProductos] = useState<CartaProducto[]>([]);
   const { estaAutenticado } = useAuth();
 
   useEffect(() => {
-    // Cargar publicaciones
-    const pubGuardadas = localStorage.getItem("publicaciones");
-    if (pubGuardadas && JSON.parse(pubGuardadas).length > 0) {
-      setPublicaciones(JSON.parse(pubGuardadas));
-    } else {
-      const publicacionesMock = [
-        {
-          id: 1,
-          imagen: "/oso_traje.webp",
-          titulo: "Nueva Colección de Disfraces",
-          fecha: "15/06/2026",
-          descripcion:
-            "Estamos emocionados de anunciar nuestra nueva colección de disfraces para esta temporada. Hemos trabajado duro para traer los mejores diseños y materiales. ¡Ven a verlos! Tendremos promociones especiales para los primeros compradores.",
-        },
-        {
-          id: 2,
-          imagen: "/traje_caporal.jpg",
-          titulo: "Taller de Costura Básica",
-          fecha: "10/06/2026",
-          descripcion:
-            "El próximo mes abriremos un taller de costura básica para todos los interesados en aprender este hermoso arte. Las inscripciones ya están abiertas. No se requiere experiencia previa, solo ganas de aprender.",
-        },
-      ];
-      setPublicaciones(publicacionesMock);
-    }
-
-    useEffect(() => {
-      async function cargarDatos() {
-        // Cargar publicaciones
-        const pubResult = await obtenerTodos("publicaciones");
-        if (pubResult.exito && pubResult.datos.length > 0) {
-          setPublicaciones(pubResult.datos);
-        } else {
-          setPublicaciones(publicacionesMock);
-        }
-        
-        // Cargar productos
-        const prodResult = await obtenerTodos("productos");
-        if (prodResult.exito) setProductos(prodResult.datos);
+    async function cargarDatos() {
+      // Cargar publicaciones
+      const pubResult = await obtenerTodos("publicaciones");
+      if (pubResult.exito && pubResult.datos.length > 0) {
+        setPublicaciones(pubResult.datos);
+      } else {
+        const publicacionesMock = [
+          {
+            id: "1",
+            imagen: "/oso_traje.webp",
+            titulo: "Nueva Colección de Disfraces",
+            fecha: "15/06/2026",
+            descripcion:
+              "Estamos emocionados de anunciar nuestra nueva colección de disfraces para esta temporada.",
+          },
+          {
+            id: "2",
+            imagen: "/traje_caporal.jpg",
+            titulo: "Taller de Costura Básica",
+            fecha: "10/06/2026",
+            descripcion:
+              "El próximo mes abriremos un taller de costura básica para todos los interesados.",
+          },
+        ];
+        setPublicaciones(publicacionesMock);
       }
-      cargarDatos();
-    }, []);
+
+      // Cargar productos
+      const prodResult = await obtenerTodos("productos");
+      if (prodResult.exito) setProductos(prodResult.datos);
+    }
+    cargarDatos();
+  }, []);
 
   return (
     <main>
-      {/* HEADER CON NOMBRE DE USUARIO */}
       <Header />
 
       {/* HERO SECTION */}
@@ -101,7 +91,6 @@ export default function HomePage() {
           overflow: "hidden",
         }}
       >
-        {/* Logo centrado arriba */}
         <img
           src="/ConC alter version.png"
           alt="Logo Confecciones Carmen"
@@ -113,7 +102,6 @@ export default function HomePage() {
           }}
         />
 
-        {/* Contenido del hero */}
         <div style={{ position: "relative", zIndex: 1, maxWidth: "800px" }}>
           <div
             style={{
@@ -128,52 +116,20 @@ export default function HomePage() {
             }}
           >
             <span style={{ fontSize: "1.2rem" }}>🧵</span>
-            <span
-              style={{
-                fontSize: "0.9rem",
-                fontWeight: 600,
-                color: "#2b7a2b",
-              }}
-            >
+            <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "#2b7a2b" }}>
               Desde Copiapó, con amor
             </span>
           </div>
 
-          <h1
-            style={{
-              fontSize: "3.5rem",
-              fontWeight: 800,
-              color: "#2b7a2b",
-              marginBottom: "1rem",
-              lineHeight: 1.2,
-            }}
-          >
+          <h1 style={{ fontSize: "3.5rem", fontWeight: 800, color: "#2b7a2b", marginBottom: "1rem", lineHeight: 1.2 }}>
             Confecciones <span style={{ color: "#8B3A4A" }}>Carmen</span>
           </h1>
 
-          <p
-            style={{
-              fontSize: "1.2rem",
-              color: "#495057",
-              marginBottom: "2rem",
-              lineHeight: 1.6,
-              maxWidth: "600px",
-              margin: "0 auto 2rem auto",
-            }}
-          >
-            Especialistas en confección de trajes, vestidos y arreglos. Calidad
-            y dedicación en cada puntada.
+          <p style={{ fontSize: "1.2rem", color: "#495057", marginBottom: "2rem", lineHeight: 1.6, maxWidth: "600px", margin: "0 auto 2rem auto" }}>
+            Especialistas en confección de trajes, vestidos y arreglos. Calidad y dedicación en cada puntada.
           </p>
 
-          {/* BOTONES DEL HERO */}
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              justifyContent: "center",
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="#productos" style={botonVerde}>
               👗 Ver Productos
             </Link>
@@ -190,12 +146,9 @@ export default function HomePage() {
             )}
 
             {estaAutenticado && (
-              <>
-                <Link href="/agendar-cita" style={botonBordeBordo}>
-                  📅 Agendar Cita
-                </Link>
-                
-              </>
+              <Link href="/agendar-cita" style={botonBordeBordo}>
+                📅 Agendar Cita
+              </Link>
             )}
           </div>
         </div>
@@ -205,28 +158,14 @@ export default function HomePage() {
       <section id="productos" style={{ padding: "4rem 2rem", background: "white" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-            <span
-              style={{
-                display: "inline-block",
-                background: "#d4edda",
-                color: "#155724",
-                padding: "0.4rem 1.2rem",
-                borderRadius: "999px",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                marginBottom: "1rem",
-              }}
-            >
+            <span style={{
+              display: "inline-block", background: "#d4edda", color: "#155724",
+              padding: "0.4rem 1.2rem", borderRadius: "999px", fontSize: "0.85rem",
+              fontWeight: 600, marginBottom: "1rem",
+            }}>
               ✨ Nuestro Catálogo
             </span>
-            <h2
-              style={{
-                fontSize: "2.2rem",
-                fontWeight: 700,
-                color: "#212529",
-                marginBottom: "0.5rem",
-              }}
-            >
+            <h2 style={{ fontSize: "2.2rem", fontWeight: 700, color: "#212529", marginBottom: "0.5rem" }}>
               Productos Destacados
             </h2>
             <p style={{ color: "#6c757d", fontSize: "1rem" }}>
@@ -234,93 +173,12 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* ✅ Aquí luego va la parte 2 con el grid dinámico */}
-
-
-          {/* Grid de productos */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-              gap: "2rem",
-            }}
-          >
-            <Carta
-              id={1}
-              image="/oso_traje.webp"
-              name="Traje Oso"
-              descripcion="Traje completo de oso con detalles artesanales."
-              categoria="Trajes"
-              costo={45000}
-              stock={3}
-              onAddToCart={agregarAlCarrito}
-            />
-            <Carta
-              id={2}
-              image="/cabeza_oso.webp"
-              name="Cabeza Oso"
-              descripcion="Cabeza decorada con colores vibrantes."
-              categoria="Accesorios"
-              costo={20000}
-              stock={5}
-              onAddToCart={agregarAlCarrito}
-            />
-            <Carta
-              id={3}
-              image="/saya-boy.webp"
-              name="Saya Boy"
-              descripcion="Vestimenta tradicional con cinturón rojo."
-              categoria="Trajes"
-              costo={35000}
-              stock={1}
-              onAddToCart={agregarAlCarrito}
-            />
-            <Carta
-              id={4}
-              image="/traje.webp"
-              name="Traje"
-              descripcion="Vestimenta Disfraz Jesús"
-              categoria="Trajes"
-              costo={35000}
-              stock={1}
-              onAddToCart={agregarAlCarrito}
-            />
-            <Carta
-              id={5}
-              image="/traje_caporal.jpg"
-              name="Traje Caporal"
-              descripcion="Vestimenta Caporal"
-              categoria="Trajes"
-              costo={35000}
-              stock={0}
-              onAddToCart={agregarAlCarrito}
-            />
-            <Carta
-              id={6}
-              image="/traje_niña.jpg"
-              name="Traje Niña"
-              descripcion="Vestimenta para niñas a la medida"
-              categoria="Trajes"
-              costo={35000}
-              stock={1}
-              onAddToCart={agregarAlCarrito}
-            />
-            
-            {productos.length === 0 ? (
-              <p
-                style={{
-                  textAlign: "center",
-                  color: "#6c757d",
-                  gridColumn: "1 / -1",
-                }}
-              >
-                No hay productos disponibles aún.
-              </p>
-            ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "2rem" }}>
+            {productos.length > 0 ? (
               productos.map((p) => (
                 <Carta
                   key={p.id}
-                  id={p.id}
+                  id={Number(p.id) || 0}
                   image={p.image}
                   name={p.name}
                   descripcion={p.descripcion}
@@ -330,105 +188,52 @@ export default function HomePage() {
                   onAddToCart={() => agregarAlCarrito(p)}
                 />
               ))
+            ) : (
+              <>
+                {/* Productos de ejemplo si no hay en Firestore */}
+                <Carta id={1} image="/oso_traje.webp" name="Traje Oso" descripcion="Traje completo de oso con detalles artesanales." categoria="Trajes" costo={45000} stock={3} onAddToCart={agregarAlCarrito} />
+                <Carta id={2} image="/cabeza_oso.webp" name="Cabeza Oso" descripcion="Cabeza decorada con colores vibrantes." categoria="Accesorios" costo={20000} stock={5} onAddToCart={agregarAlCarrito} />
+                <Carta id={3} image="/saya-boy.webp" name="Saya Boy" descripcion="Vestimenta tradicional con cinturón rojo." categoria="Trajes" costo={35000} stock={1} onAddToCart={agregarAlCarrito} />
+                <Carta id={4} image="/traje.webp" name="Traje" descripcion="Vestimenta Disfraz Jesús" categoria="Trajes" costo={35000} stock={1} onAddToCart={agregarAlCarrito} />
+                <Carta id={5} image="/traje_caporal.jpg" name="Traje Caporal" descripcion="Vestimenta Caporal" categoria="Trajes" costo={35000} stock={0} onAddToCart={agregarAlCarrito} />
+                <Carta id={6} image="/traje_niña.jpg" name="Traje Niña" descripcion="Vestimenta para niñas a la medida" categoria="Trajes" costo={35000} stock={1} onAddToCart={agregarAlCarrito} />
+              </>
             )}
           </div>
         </div>
       </section>
 
       {/* SECCIÓN DE SERVICIOS */}
-      <section
-        style={{
-          padding: "4rem 2rem",
-          background: "#f8f9fa",
-        }}
-      >
+      <section style={{ padding: "4rem 2rem", background: "#f8f9fa" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-            <span
-              style={{
-                display: "inline-block",
-                background: "#fff3cd",
-                color: "#856404",
-                padding: "0.4rem 1.2rem",
-                borderRadius: "999px",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                marginBottom: "1rem",
-              }}
-            >
+            <span style={{
+              display: "inline-block", background: "#fff3cd", color: "#856404",
+              padding: "0.4rem 1.2rem", borderRadius: "999px", fontSize: "0.85rem",
+              fontWeight: 600, marginBottom: "1rem",
+            }}>
               🛠️ Servicios
             </span>
-            <h2
-              style={{
-                fontSize: "2.2rem",
-                fontWeight: 700,
-                color: "#212529",
-                marginBottom: "0.5rem",
-              }}
-            >
+            <h2 style={{ fontSize: "2.2rem", fontWeight: 700, color: "#212529", marginBottom: "0.5rem" }}>
               ¿Qué ofrecemos?
             </h2>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-              gap: "2rem",
-            }}
-          >
-            <div
-              style={{
-                background: "white",
-                borderRadius: "16px",
-                padding: "2rem",
-                textAlign: "center",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-              }}
-            >
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "2rem" }}>
+            <div style={{ background: "white", borderRadius: "16px", padding: "2rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>👗</div>
-              <h3 style={{ marginBottom: "0.5rem", color: "#212529" }}>
-                Creación
-              </h3>
-              <p style={{ color: "#6c757d", fontSize: "0.95rem" }}>
-                Confección de prendas desde cero con diseños únicos
-              </p>
+              <h3 style={{ marginBottom: "0.5rem", color: "#212529" }}>Creación</h3>
+              <p style={{ color: "#6c757d", fontSize: "0.95rem" }}>Confección de prendas desde cero con diseños únicos</p>
             </div>
-
-            <div
-              style={{
-                background: "white",
-                borderRadius: "16px",
-                padding: "2rem",
-                textAlign: "center",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-              }}
-            >
+            <div style={{ background: "white", borderRadius: "16px", padding: "2rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🔧</div>
-              <h3 style={{ marginBottom: "0.5rem", color: "#212529" }}>
-                Modificaciones
-              </h3>
-              <p style={{ color: "#6c757d", fontSize: "0.95rem" }}>
-                Ajustes y cambios para que tus prendas queden perfectas
-              </p>
+              <h3 style={{ marginBottom: "0.5rem", color: "#212529" }}>Modificaciones</h3>
+              <p style={{ color: "#6c757d", fontSize: "0.95rem" }}>Ajustes y cambios para que tus prendas queden perfectas</p>
             </div>
-
-            <div
-              style={{
-                background: "white",
-                borderRadius: "16px",
-                padding: "2rem",
-                textAlign: "center",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-              }}
-            >
+            <div style={{ background: "white", borderRadius: "16px", padding: "2rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🪡</div>
-              <h3 style={{ marginBottom: "0.5rem", color: "#212529" }}>
-                Reparación
-              </h3>
-              <p style={{ color: "#6c757d", fontSize: "0.95rem" }}>
-                Arreglos y composturas para dar nueva vida a tu ropa
-              </p>
+              <h3 style={{ marginBottom: "0.5rem", color: "#212529" }}>Reparación</h3>
+              <p style={{ color: "#6c757d", fontSize: "0.95rem" }}>Arreglos y composturas para dar nueva vida a tu ropa</p>
             </div>
           </div>
         </div>
@@ -449,11 +254,7 @@ export default function HomePage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "2rem" }}>
             {publicaciones.length > 0 ? (
               publicaciones.map((pub) => (
-                <CartaPublicacion 
-                  key={pub.id} 
-                  pub={pub} 
-                  onClick={() => setSelectedPub(pub)} 
-                />
+                <CartaPublicacion key={pub.id} pub={pub} onClick={() => setSelectedPub(pub)} />
               ))
             ) : (
               <p style={{ textAlign: "center", color: "#6c757d", gridColumn: "1 / -1" }}>
@@ -466,38 +267,23 @@ export default function HomePage() {
 
       {/* MODAL DE PUBLICACIÓN */}
       {selectedPub && (
-        <div 
-          onClick={() => setSelectedPub(null)}
-          style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{ background: "white", borderRadius: "12px", maxWidth: "600px", width: "100%", overflow: "hidden", position: "relative", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
-          >
-            <button 
-              onClick={() => setSelectedPub(null)}
-              style={{ 
-                position: "absolute", top: "15px", right: "15px", background: "#dc3545", color: "white", 
-                border: "none", borderRadius: "50%", width: "36px", height: "36px", 
-                cursor: "pointer", fontSize: "1.2rem", fontWeight: "bold", zIndex: 10 
-              }}
-            >
+        <div onClick={() => setSelectedPub(null)} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: "white", borderRadius: "12px", maxWidth: "600px", width: "100%", overflow: "hidden", position: "relative", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}>
+            <button onClick={() => setSelectedPub(null)} style={{ position: "absolute", top: "15px", right: "15px", background: "#dc3545", color: "white", border: "none", borderRadius: "50%", width: "36px", height: "36px", cursor: "pointer", fontSize: "1.2rem", fontWeight: "bold", zIndex: 10 }}>
               ✕
             </button>
             <img src={selectedPub.imagen} alt={selectedPub.titulo} style={{ width: "100%", height: "250px", objectFit: "cover" }} />
             <div style={{ padding: "2rem" }}>
-              <small style={{ color: "#6c757d", fontWeight: 600 }}>{selectedPub.fecha}</small>
+              <small style={{ color: "#6c757d", fontWeight: 600 }}>{selectedPub.fechaCreacion || selectedPub.fecha}</small>
               <h2 style={{ margin: "0.5rem 0", color: "#212529" }}>{selectedPub.titulo}</h2>
-              <p style={{ color: "#495057", lineHeight: "1.6" }}>{selectedPub.descripcion}</p>
+              <p style={{ color: "#495057", lineHeight: "1.6" }}>{selectedPub.contenido || selectedPub.descripcion}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* FOOTER */}
       <Footer />
 
-      {/* Animación de rebote */}
       <style jsx>{`
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
@@ -509,7 +295,7 @@ export default function HomePage() {
 }
 
 // =========================================================================
-// ESTILOS DE BOTONES
+// ESTILOS DE BOTONES (FUERA del componente)
 // =========================================================================
 
 const botonVerde: React.CSSProperties = {
