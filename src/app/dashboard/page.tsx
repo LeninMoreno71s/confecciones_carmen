@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { obtenerTodos } from "../../lib/firestore";
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -14,26 +15,63 @@ export default function DashboardPage() {
   const [pedidos, setPedidos] = useState<any[]>([]);
   const [citas, setCitas] = useState<any[]>([]);
 
-  // Protección de acceso solo para admin
+  // Protección de acceso solo para admin + Carga de datos
   useEffect(() => {
+    // Verificar autenticación
     if (!cargandoAuth && (!estaAutenticado || usuario?.rol !== "admin")) {
       router.push("/login");
+      return;
     }
 
-    const prodData = localStorage.getItem("productos");
-    const pedData = localStorage.getItem("pedidos");
-    const citasData = localStorage.getItem("citas");
+    // Cargar datos de Firestore
+    async function cargarDatos() {
+      try {
+        // Cargar productos
+        const prodResult = await obtenerTodos("productos");
+        if (prodResult.exito) setProductos(prodResult.datos);
 
-    if (prodData) setProductos(JSON.parse(prodData));
-    if (pedData) setPedidos(JSON.parse(pedData));
-    if (citasData) setCitas(JSON.parse(citasData));
+        // Cargar pedidos
+        const pedResult = await obtenerTodos("pedidos");
+        if (pedResult.exito) setPedidos(pedResult.datos);
+
+        // Cargar citas
+        const citasResult = await obtenerTodos("citas");
+        if (citasResult.exito) setCitas(citasResult.datos);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    }
+
+    // Solo cargar si está autenticado como admin
+    if (estaAutenticado && usuario?.rol === "admin") {
+      cargarDatos();
+    }
   }, [estaAutenticado, usuario, router, cargandoAuth]);
 
   // Estadísticas dinámicas
   const stats = [
-    { label: "Productos", value: productos.length, icon: "👗", color: "#2b7a2b" },
-    { label: "Pedidos Pendientes", value: pedidos.filter(p => p.estado === "Pendiente").length, icon: "📦", color: "#C4A35A" },
-    { label: "Citas Hoy", value: citas.filter(c => new Date(c.fecha).toDateString() === new Date().toDateString()).length, icon: "📅", color: "#8B3A4A" },
+    { 
+      label: "Productos", 
+      value: productos.length, 
+      icon: "👗", 
+      color: "#2b7a2b" 
+    },
+    { 
+      label: "Pedidos Pendientes", 
+      value: pedidos.filter((p) => p.estado === "Pendiente" || p.estado === "pendiente").length, 
+      icon: "📦", 
+      color: "#C4A35A" 
+    },
+    { 
+      label: "Citas Hoy", 
+      value: citas.filter((c) => {
+        const fechaCita = new Date(c.fecha + "T00:00:00");
+        const hoy = new Date();
+        return fechaCita.toDateString() === hoy.toDateString();
+      }).length, 
+      icon: "📅", 
+      color: "#8B3A4A" 
+    },
   ];
 
   const menuItems = [
@@ -43,6 +81,15 @@ export default function DashboardPage() {
     { href: "/citas", label: "Citas", icon: "📅", active: false },
     { href: "/publicaciones", label: "Publicaciones", icon: "📰", active: false },
   ];
+
+  // Esperar a que cargue la autenticación
+  if (cargandoAuth) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <p>Cargando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="intranet-layout">
@@ -137,21 +184,29 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {pedidos.slice(-5).map((p) => (
-                  <tr key={p.id}>
-                    <td>#{p.id}</td>
-                    <td>{p.cliente}</td>
-                    <td>
-                      {p.productos.map((prod: any) => `${prod.name} x${prod.cantidad}`).join(", ")}
-                    </td>
-                    <td>{p.fecha}</td>
-                    <td>
-                      <span className={`badge ${p.estado === "Pendiente" ? "badge-warning" : "badge-success"}`}>
-                        {p.estado}
-                      </span>
+                {pedidos.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: "center", color: "#6c757d" }}>
+                      No hay pedidos registrados
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  pedidos.slice(-5).map((p) => (
+                    <tr key={p.id}>
+                      <td>#{p.id?.substring(0, 8) || "N/A"}</td>
+                      <td>{p.cliente || "Sin nombre"}</td>
+                      <td>
+                        {p.productos?.map((prod: any) => `${prod.name} x${prod.cantidad}`).join(", ") || "Sin productos"}
+                      </td>
+                      <td>{p.fecha || "Sin fecha"}</td>
+                      <td>
+                        <span className={`badge ${p.estado === "Pendiente" || p.estado === "pendiente" ? "badge-warning" : "badge-success"}`}>
+                          {p.estado || "Desconocido"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

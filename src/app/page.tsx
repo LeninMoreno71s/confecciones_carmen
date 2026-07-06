@@ -7,6 +7,7 @@ import Carta from "../../components/carta_producto";
 import CartaPublicacion from "../../components/carta_publicacion";
 import { CartaProducto, ItemCarrito } from "../../types/productos";
 import { useAuth } from "../app/context/AuthContext";
+import { obtenerTodos } from "../lib/firestore";
 
 const agregarAlCarrito = (producto: CartaProducto) => {
   const data = localStorage.getItem("carrito");
@@ -61,12 +62,22 @@ export default function HomePage() {
       setPublicaciones(publicacionesMock);
     }
 
-    // ✅ Cargar productos creados por el admin
-    const data = localStorage.getItem("productos");
-    if (data) {
-      setProductos(JSON.parse(data));
-    }
-  }, []);
+    useEffect(() => {
+      async function cargarDatos() {
+        // Cargar publicaciones
+        const pubResult = await obtenerTodos("publicaciones");
+        if (pubResult.exito && pubResult.datos.length > 0) {
+          setPublicaciones(pubResult.datos);
+        } else {
+          setPublicaciones(publicacionesMock);
+        }
+        
+        // Cargar productos
+        const prodResult = await obtenerTodos("productos");
+        if (prodResult.exito) setProductos(prodResult.datos);
+      }
+      cargarDatos();
+    }, []);
 
   return (
     <main>
