@@ -47,12 +47,9 @@ export default function ProductosPage() {
       const resultado = await obtenerTodos("productos");
       
       if (resultado.exito && resultado.datos.length > 0) {
-        // Hay productos en Firestore
         setProductos(resultado.datos);
       } else {
-        // No hay productos: insertar los iniciales
         setProductos(productosIniciales);
-        // Guardar cada producto inicial en Firestore
         for (const prod of productosIniciales) {
           await agregarDocumento("productos", prod);
         }
@@ -75,7 +72,6 @@ export default function ProductosPage() {
     setSubiendo(true);
     let rutaImagen = nuevo.image || "/oso_traje.webp";
 
-    // Subir archivo a /api/upload si se seleccionó uno
     if (archivo) {
       const formData = new FormData();
       formData.append("file", archivo);
@@ -112,7 +108,6 @@ export default function ProductosPage() {
     });
 
     if (resultado.exito) {
-      // Agregar a la lista local con el ID de Firestore
       setProductos([...productos, { ...nuevo, image: rutaImagen, id: resultado.id } as any]);
       setNuevo({ id: 0, image: "", name: "", descripcion: "", categoria: "", costo: 0, stock: 0 });
       setArchivo(null);
@@ -144,14 +139,12 @@ export default function ProductosPage() {
     }
   };
 
-  // Filtrar productos
   const resultados = productos.filter(
     (p) =>
       p.name.toLowerCase().includes(busqueda.toLowerCase()) ||
       p.categoria.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  // Loader
   if (cargandoAuth || cargando) {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
@@ -164,7 +157,6 @@ export default function ProductosPage() {
     <div style={{ padding: "2rem", backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
       <h1 style={{ color: "#800020", marginBottom: "1.5rem" }}>👗 Panel de Productos</h1>
 
-      {/* Botones de navegación */}
       <div style={{ display: "flex", flexDirection: "row", gap: "1rem", marginBottom: "2rem" }}>
         <Link href="/">
           <button style={{ padding: "0.6rem 1.2rem", backgroundColor: "#3FA572", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: 600 }}>
@@ -186,6 +178,7 @@ export default function ProductosPage() {
       }}>
         <h2 style={{ marginBottom: "1rem", color: "#3FA572" }}>➕ Añadir nuevo producto</h2>
         <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+          
           <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
             <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#3FA572" }}>📷 Imagen del Producto:</label>
             <input
@@ -196,21 +189,44 @@ export default function ProductosPage() {
               style={{ padding: "0.5rem", borderRadius: "8px", border: "1px dashed #3FA572", background: "#f0f8f0", fontSize: "0.85rem" }}
             />
           </div>
-          <input type="text" placeholder="Nombre" value={nuevo.name}
-            onChange={(e) => setNuevo({ ...nuevo, name: e.target.value })}
-            style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
-          <input type="text" placeholder="Descripción" value={nuevo.descripcion}
-            onChange={(e) => setNuevo({ ...nuevo, descripcion: e.target.value })}
-            style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
-          <input type="text" placeholder="Categoría" value={nuevo.categoria}
-            onChange={(e) => setNuevo({ ...nuevo, categoria: e.target.value })}
-            style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
-          <input type="number" placeholder="Costo" value={nuevo.costo}
-            onChange={(e) => setNuevo({ ...nuevo, costo: Number(e.target.value) })}
-            style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
-          <input type="number" placeholder="Stock" value={nuevo.stock}
-            onChange={(e) => setNuevo({ ...nuevo, stock: Number(e.target.value) })}
-            style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc" }} />
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#3FA572" }}>Nombre:</label>
+            <input type="text" placeholder="Nombre" value={nuevo.name}
+              onChange={(e) => setNuevo({ ...nuevo, name: e.target.value })}
+              style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc", width: "100%" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#3FA572" }}>Descripción:</label>
+            <input type="text" placeholder="Descripción" value={nuevo.descripcion}
+              onChange={(e) => setNuevo({ ...nuevo, descripcion: e.target.value })}
+              style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc", width: "100%" }} />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#3FA572" }}>Categoría:</label>
+            <input type="text" placeholder="Categoría" value={nuevo.categoria}
+              onChange={(e) => setNuevo({ ...nuevo, categoria: e.target.value })}
+              style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc", width: "100%" }} />
+          </div>
+
+          {/* ETIQUETA AÑADIDA AL COSTO/PRECIO */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#3FA572" }}> Precio ($):</label>
+            <input type="number" placeholder="Costo" value={nuevo.costo}
+              onChange={(e) => setNuevo({ ...nuevo, costo: Number(e.target.value) })}
+              style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc", width: "100%" }} />
+          </div>
+
+          {/* ETIQUETA AÑADIDA AL STOCK */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#3FA572" }}>📦 Stock Disponible:</label>
+            <input type="number" placeholder="Stock" value={nuevo.stock}
+              onChange={(e) => setNuevo({ ...nuevo, stock: Number(e.target.value) })}
+              style={{ padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc", width: "100%" }} />
+          </div>
+
         </div>
         <button onClick={crearProducto} disabled={subiendo} style={{
           marginTop: "1rem", padding: "0.6rem 1.2rem", backgroundColor: subiendo ? "#6c757d" : "#3FA572",
@@ -220,12 +236,10 @@ export default function ProductosPage() {
         </button>
       </div>
 
-      {/* Buscar producto */}
       <input type="text" placeholder="🔍 Buscar por nombre o categoría..." value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
         style={{ marginBottom: "1.5rem", padding: "0.6rem", borderRadius: "8px", border: "1px solid #ccc", width: "100%", maxWidth: "400px" }} />
 
-      {/* Mostrar productos */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "2rem" }}>
         {resultados.map((p) => (
           <div key={p.id} style={{

@@ -2,11 +2,9 @@
 import { useEffect, useState } from "react";
 import { ItemCarrito } from "../../../types/productos";
 import Link from "next/link";
-// IMPORTANTE: Asegúrate de importar la función para guardar en tu archivo de firestore
-// (Cámbiala por agregarDocumento o la que tengas definida para crear registros)
-import { actualizarDocumento } from "../../lib/firestore"; 
 import { db } from "../../lib/firebase"; // Ajusta esta ruta según tu configuración de Firebase
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+// Añadimos las funciones nativas necesarias para buscar y actualizar productos individualmente
+import { collection, addDoc, serverTimestamp, doc, getDocs, updateDoc } from "firebase/firestore";
 
 export default function CarritoPage() {
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
@@ -42,39 +40,79 @@ export default function CarritoPage() {
   const calcularTotal = () =>
     carrito.reduce((acc, item) => acc + item.costo * item.cantidad, 0);
 
-  // Modificado para subir el pedido a Firebase Cloud Firestore
+  // Modificado para subir el pedido a Firebase y bajar el stock de los productos
   const finalizarCompra = async () => {
     if (carrito.length === 0) return;
 
     const usuarioActual = JSON.parse(localStorage.getItem("usuario_actual") || "{}");
 
-    // Construcción del objeto alineado exactamente con tu Firebase
-    const nuevoPedido = {
-      cliente: `${usuarioActual.nombre || ""} ${usuarioActual.apellido || ""}`.trim() || usuarioActual.correo || "Invitado",
-      clienteId: usuarioActual.id || "",
-      estado: "pendiente", // En minúscula para que coincida con tu base de datos
-      fechaCreacion: serverTimestamp(), // Usa el Timestamp nativo de Firebase
-      fechaActualizacion: serverTimestamp(),
-      total: calcularTotal(),
-      productos: carrito.map((item) => ({
-        id: item.id,
-        name: item.name,
-        cantidad: item.cantidad,
-        costo: item.costo,
-      })),
-    };
-
     try {
-      // Guarda directamente en la colección 'pedidos' de Firebase
+      // 1. OBTENER LOS PRODUCTOS ACTUALES DE FIRESTORE PARA COMPROBAR EL STOCK REAL
+      const querySnapshot = await getDocs(collection(db, "productos"));
+      const productosFirebase = querySnapshot.docs.map(doc => ({
+        firestoreId: doc.id, // ID interno de Firebase (ej: string largo de letras y números)
+        ...doc.data()
+      })) as any[];
+
+      // 2. VALIDAR SI HAY STOCK PARA CADA ELEMENTO DEL CARRITO
+      for (const item of carrito) {
+        // Buscamos coincidencia ya sea por el ID numérico o name si tu Firestore los guardó así
+        const prodMatch = productosFirebase.find(
+          (p) => String(p.id) === String(item.id) || p.name?.toLowerCase() === item.name?.toLowerCase()
+        );
+
+        if (!prodMatch) {
+          alert(`❌ El producto "${item.name}" ya no se encuentra registrado en el sistema.`);
+          return;
+        }
+
+        if (prodMatch.stock < item.cantidad) {
+          alert(`❌ Stock insuficiente para "${item.name}". Solo quedan ${prodMatch.stock} unidades disponibles.`);
+          return;
+        }
+      }
+
+      // 3. CONSTRUCCIÓN DEL OBJETO PEDIDO
+      const nuevoPedido = {
+        cliente: `${usuarioActual.nombre || ""} ${usuarioActual.apellido || ""}`.trim() || usuarioActual.correo || "Invitado",
+        clienteId: usuarioActual.id || "",
+        estado: "pendiente", 
+        fechaCreacion: serverTimestamp(), 
+        fechaActualizacion: serverTimestamp(),
+        total: calcularTotal(),
+        productos: carrito.map((item) => ({
+          id: item.id,
+          name: item.name,
+          cantidad: item.cantidad,
+          costo: item.costo,
+        })),
+      };
+
+      // 4. GUARDAR EL PEDIDO EN LA COLECCIÓN 'PEDIDOS'
       await addDoc(collection(db, "pedidos"), nuevoPedido);
 
-      // Limpia el estado local una vez guardado con éxito en la nube
+      // 5. 🔥 DESCONTAR EL STOCK DE LOS PRODUCTOS EN FIREBASE 🔥
+      for (const item of carrito) {
+        const prodMatch = productosFirebase.find(
+          (p) => String(p.id) === String(item.id) || p.name?.toLowerCase() === item.name?.toLowerCase()
+        );
+
+        if (prodMatch) {
+          const nuevoStock = Math.max(0, prodMatch.stock - item.cantidad);
+          // Creamos la referencia al documento usando el ID único de Firestore
+          const productoRef = doc(db, "productos", prodMatch.firestoreId);
+          // Actualizamos de forma nativa el campo stock
+          await updateDoc(productoRef, { stock: nuevoStock });
+        }
+      }
+
+      // 6. LIMPIAR EL ESTADO LOCAL TRAS EL ÉXITO EN LA NUBE
       localStorage.removeItem("carrito");
       setCarrito([]);
 
-      alert("✅ ¡Compra finalizada con éxito! Tu pedido ya está en camino al administrador.");
+      alert("✅ ¡Compra finalizada con éxito! Tu pedido fue generado y el stock actualizado.");
     } catch (error) {
-      console.error("Error al guardar el pedido: ", error);
+      console.error("Error al procesar la compra o actualizar stock: ", error);
       alert("❌ Hubo un problema al procesar tu pedido. Inténtalo de nuevo.");
     }
   };
