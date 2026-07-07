@@ -12,12 +12,12 @@ interface ProductoPedido {
   costo: number;
 }
 
-// Interfaz de pedido
+// Interfaz de pedido adaptada para Firestore
 interface Pedido {
   id: string;
   cliente: string;
   productos: ProductoPedido[];
-  fecha: string;
+  fechaCreacion?: { seconds: number; nanoseconds: number }; // Coincide con Firebase
   estado: string;
 }
 
@@ -84,15 +84,29 @@ export default function PedidosPage() {
       )
   );
 
-  // Colores por estado
+  // Colores por estado (Normalizado a minúsculas)
   const colorEstado = (estado: string) => {
     switch (estado?.toLowerCase()) {
       case "pendiente": return "#ffc107";
+      case "en preparacion": 
       case "en preparación": return "#0d6efd";
       case "entregado": return "#198754";
       case "cancelado": return "#dc3545";
       default: return "#6c757d";
     }
+  };
+
+  // Formateador seguro para el Timestamp de Firebase
+  const formatearFecha = (fechaCreacion?: { seconds: number }) => {
+    if (!fechaCreacion || !fechaCreacion.seconds) return "Sin fecha";
+    const fechaObjeto = new Date(fechaCreacion.seconds * 1000);
+    return fechaObjeto.toLocaleDateString("es-CL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
   };
 
   // Loader
@@ -150,8 +164,6 @@ export default function PedidosPage() {
           fontSize: "1rem",
           outline: "none",
         }}
-        onFocus={(e) => e.target.style.borderColor = "#2b7a2b"}
-        onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
       />
 
       {/* Listado de pedidos */}
@@ -200,14 +212,15 @@ export default function PedidosPage() {
               </div>
 
               <p style={{ margin: "0.25rem 0" }}><strong>👤 Cliente:</strong> {p.cliente || "Sin nombre"}</p>
-              <p style={{ margin: "0.25rem 0" }}><strong>📅 Fecha:</strong> {p.fecha || "Sin fecha"}</p>
+              {/* Modificado: Ahora llama a la función que convierte de Firebase a Texto entendible */}
+              <p style={{ margin: "0.25rem 0" }}><strong>📅 Fecha:</strong> {formatearFecha(p.fechaCreacion)}</p>
 
               <div style={{ marginTop: "0.75rem" }}>
                 <strong>🛍️ Productos:</strong>
                 <ul style={{ marginTop: "0.25rem", paddingLeft: "1.2rem" }}>
                   {p.productos?.map((prod, index) => (
                     <li key={`${prod.id}-${index}`} style={{ fontSize: "0.9rem" }}>
-                      {prod.name} — x{prod.cantidad} (${prod.costo?.toLocaleString("es-CL")} c/u)
+                      {prod.name || "Producto sin nombre"} — x{prod.cantidad} (${prod.costo?.toLocaleString("es-CL")} c/u)
                     </li>
                   )) || <li style={{ color: "#6c757d" }}>Sin productos</li>}
                 </ul>

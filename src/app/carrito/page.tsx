@@ -2,6 +2,11 @@
 import { useEffect, useState } from "react";
 import { ItemCarrito } from "../../../types/productos";
 import Link from "next/link";
+// IMPORTANTE: Asegúrate de importar la función para guardar en tu archivo de firestore
+// (Cámbiala por agregarDocumento o la que tengas definida para crear registros)
+import { actualizarDocumento } from "../../lib/firestore"; 
+import { db } from "../../lib/firebase"; // Ajusta esta ruta según tu configuración de Firebase
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function CarritoPage() {
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
@@ -37,37 +42,41 @@ export default function CarritoPage() {
   const calcularTotal = () =>
     carrito.reduce((acc, item) => acc + item.costo * item.cantidad, 0);
 
-  const finalizarCompra = () => {
+  // Modificado para subir el pedido a Firebase Cloud Firestore
+  const finalizarCompra = async () => {
     if (carrito.length === 0) return;
 
     const usuarioActual = JSON.parse(localStorage.getItem("usuario_actual") || "{}");
 
+    // Construcción del objeto alineado exactamente con tu Firebase
     const nuevoPedido = {
-    id: Date.now(),
-    cliente:
-      `${usuarioActual.nombre || ""} ${usuarioActual.apellido || ""}`.trim() ||
-      usuarioActual.correo ||
-      "Invitado",
-    productos: carrito.map((item) => ({
-      id: item.id,
-      name: item.name,   // ✅ usar "name"
-      cantidad: item.cantidad,
-      costo: item.costo,
-    })),
-    fecha: new Date().toLocaleString(),
-    estado: "Pendiente",
-  };
+      cliente: `${usuarioActual.nombre || ""} ${usuarioActual.apellido || ""}`.trim() || usuarioActual.correo || "Invitado",
+      clienteId: usuarioActual.id || "",
+      estado: "pendiente", // En minúscula para que coincida con tu base de datos
+      fechaCreacion: serverTimestamp(), // Usa el Timestamp nativo de Firebase
+      fechaActualizacion: serverTimestamp(),
+      total: calcularTotal(),
+      productos: carrito.map((item) => ({
+        id: item.id,
+        name: item.name,
+        cantidad: item.cantidad,
+        costo: item.costo,
+      })),
+    };
 
+    try {
+      // Guarda directamente en la colección 'pedidos' de Firebase
+      await addDoc(collection(db, "pedidos"), nuevoPedido);
 
-    const data = localStorage.getItem("pedidos");
-    const pedidos = data ? JSON.parse(data) : [];
-    pedidos.push(nuevoPedido);
-    localStorage.setItem("pedidos", JSON.stringify(pedidos));
+      // Limpia el estado local una vez guardado con éxito en la nube
+      localStorage.removeItem("carrito");
+      setCarrito([]);
 
-    localStorage.removeItem("carrito");
-    setCarrito([]);
-
-    alert("✅ Compra finalizada. El pedido fue generado.");
+      alert("✅ ¡Compra finalizada con éxito! Tu pedido ya está en camino al administrador.");
+    } catch (error) {
+      console.error("Error al guardar el pedido: ", error);
+      alert("❌ Hubo un problema al procesar tu pedido. Inténtalo de nuevo.");
+    }
   };
 
   return (
