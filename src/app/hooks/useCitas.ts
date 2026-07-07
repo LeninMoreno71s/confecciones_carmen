@@ -42,28 +42,21 @@ export function useCitas() {
     cargarCitas();
   }, [cargarCitas]);
 
-  // Agendar nueva cita
+
   const agendarCita = async (fecha: string, hora: string, motivo: string) => {
     if (!usuario) {
       return { exito: false, mensaje: "Debes iniciar sesión para agendar una cita" };
     }
 
-    // Verificar si ya tiene una cita en esa misma fecha y hora
-    const citaExistente = citas.find(
-      (c) =>
-        c.clienteId === usuario.id &&
-        c.fecha === fecha &&
-        c.hora === hora &&
-        c.estado !== "rechazada"
-    );
-    if (citaExistente) {
-      return { exito: false, mensaje: "Ya tienes una cita en esta fecha y hora" };
-    }
+    // ✅ Usar uid (Firebase Auth) o id (admin antiguo)
+    const clienteId = usuario.uid || usuario.id || "desconocido";
+    const clienteNombre = `${usuario.nombre || ""} ${usuario.apellido || ""}`.trim() || "Sin nombre";
+    const clienteEmail = usuario.correo || usuario.email || "";
 
     const nuevaCita = {
-      clienteId: usuario.id,
-      clienteNombre: `${usuario.nombre} ${usuario.apellido}`,
-      clienteEmail: usuario.correo,
+      clienteId: clienteId,
+      clienteNombre: clienteNombre,
+      clienteEmail: clienteEmail,
       fecha,
       hora,
       motivo: motivo.trim(),
@@ -72,6 +65,7 @@ export function useCitas() {
     };
 
     const resultado = await agregarDocumento("citas", nuevaCita);
+    
     if (resultado.exito) {
       await cargarCitas();
       return { exito: true, mensaje: "Cita agendada con éxito" };

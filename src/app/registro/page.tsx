@@ -279,6 +279,7 @@ export default function RegistroPage() {
     return Object.keys(nuevosErrores).length === 0;
   };
 
+
   // Enviar formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -301,17 +302,17 @@ export default function RegistroPage() {
       contraseña: formData.contraseña,
     };
 
-    // Intentar registrar
+    // Intentar registrar con Firebase Auth
     const resultado = await registrar(datosSanitizados);
     setCargando(false);
 
-    if (resultado) {
+    if (resultado.exito) {
       setExito(true);
       setTimeout(() => {
         router.push("/login?registro=exitoso");
       }, 2000);
     } else {
-      setError("Este correo ya está registrado. Intenta con otro.");
+      setError(resultado.error || "Error al registrar. Intenta con otro correo.");
     }
   };
 

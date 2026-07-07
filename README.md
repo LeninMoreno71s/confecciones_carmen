@@ -1,4 +1,4 @@
-# Evaluación Sumativa 3 - Programación FrontEnd
+# Evaluación Sumativa 4 - Programación FrontEnd
 **Intranet Confecciones Carmen**
 
 
@@ -35,26 +35,64 @@ Sigue estos pasos para clonar y levantar el proyecto en tu entorno de desarrollo
 El sistema cuenta con un sistema de Autenticación y 4 módulos principales:
 
 ### a) Autenticación y Sesión (Login)
-* Permite diferenciar entre clientes y un usuario administrador. 
-* Credenciales de administrador por defecto: `admin@confeccionescarmen.cl` / `admin123`.
-* Protege las rutas internas redirigiendo a los usuarios no logueados. 
+* Permite diferenciar entre clientes y un usuario administrador.
+
+* Credenciales de administrador por defecto: admin@confeccionescarmen.cl / admin123.
+
+* Protege las rutas internas redirigiendo a los usuarios no logueados.
+
+* Persistencia: Firestore (colección usuarios) + localStorage para sesión activa.
 
 ### b) Módulo de Productos (CRUD)
 * Permite gestionar el inventario de la tienda.
-* **Características:** Crear nuevos productos, ver listado, modificar stock (aumentar o disminuir) y eliminar registros con confirmación visual.
-* Persiste en `localStorage` bajo la clave `productos`.
+
+* Características: Crear nuevos productos, ver listado, modificar stock (aumentar o disminuir) y eliminar registros con confirmación visual.
+
+* Persistencia: Firestore (colección productos).
+
+* Colección en Firestore: productos → { name, descripcion, categoria, costo, stock, image }
 
 ### c) Módulo de Publicaciones (CRUD)
 * Permite gestionar noticias o anuncios de la tienda.
-* **Características:** Rutas dinámicas (`/publicaciones/[id]`) para editar y ver detalle, crear nuevas publicaciones, buscar por título y eliminar registros.
-* Persiste en `localStorage` bajo la clave `publicaciones`.
+
+* Características: Rutas dinámicas (/publicaciones/[id]) para editar y ver detalle, crear nuevas publicaciones con subida de imágenes, buscar por título y eliminar registros.
+
+* Persistencia: Firestore (colección publicaciones).
+
+* Colección en Firestore: publicaciones → { titulo, contenido, imagen, fechaCreacion, autorId }
 
 ### d) Módulo de Pedidos
 * Visualiza las compras o pedidos realizados por los clientes en el carrito.
-* Administra los estados de preparación o entrega.
+
+* Administra los estados: Pendiente, En preparación, Entregado, Cancelado.
+
+* Incluye estadísticas de total de pedidos, pendientes y entregados.
+
+* Persistencia: Firestore (colección pedidos).
+
+* Colección en Firestore: pedidos → { cliente, productos: [...], fecha, estado, total }
 
 ### e) Módulo de Citas
-* Permite administrar el agendamiento de horas (ej. para medidas de trajes).
-* Los administradores pueden "Aceptar" o "Rechazar" una cita y añadir comentarios mediante un modal.
+* Visualiza las compras o pedidos realizados por los clientes en el carrito.
+
+* Administra los estados: Pendiente, En preparación, Entregado, Cancelado.
+
+* Incluye estadísticas de total de pedidos, pendientes y entregados.
+
+* Persistencia: Firestore (colección pedidos).
+
+* Colección en Firestore: pedidos → { cliente, productos: [...], fecha, estado, total }
+
+### 3.2 Configurar las variables de entorno (Firebase)
+
+El proyecto utiliza variables de entorno para almacenar las credenciales de Firebase de forma segura. Estas credenciales no se suben al repositorio.
+
+1.-El usuario debe ir a Firebase Console
+2.-Seleccionar su proyecto
+3.-En el menú izquierdo, hacer clic en ⚙️ Project Settings (Configuración del proyecto)
+4.-En la pestaña General, baja hasta la sección "Your apps"
+5.-Selecciona tu aplicación web (si no hay una, haz clic en el ícono </> para agregar una)
+6.-En "SDK setup and configuration", selecciona la opción "Config"
+7.-Copia los valores del bloque firebaseConfig a tu archivo .env.local:
 
 

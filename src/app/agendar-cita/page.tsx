@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import { useCitas } from "../hooks/useCitas";
 import Header from "../../../components/header";
@@ -51,7 +50,9 @@ export default function AgendarCitaPage() {
   const fechaMinStr = hoy.toISOString().split("T")[0];
   const fechaMaxStr = fechaMaxima.toISOString().split("T")[0];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const citasCliente = obtenerCitasCliente();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensaje(null);
 
@@ -68,7 +69,7 @@ export default function AgendarCitaPage() {
       return;
     }
 
-    const resultado = agendarCita(fecha, hora, motivo);
+    const resultado = await agendarCita(fecha, hora, motivo);
 
     if (resultado.exito) {
       setMensaje({ tipo: "exito", texto: resultado.mensaje });
@@ -79,8 +80,6 @@ export default function AgendarCitaPage() {
       setMensaje({ tipo: "error", texto: resultado.mensaje });
     }
   };
-
-  const citasCliente = obtenerCitasCliente();
 
   return (
     <main>
@@ -132,7 +131,7 @@ export default function AgendarCitaPage() {
               }}
             >
               <h5 style={{ marginBottom: "1.5rem", color: "#333" }}>
-                <i className="bi bi-calendar-plus"></i> Nueva Cita
+                📅 Nueva Cita
               </h5>
 
               {mensaje && (
@@ -183,7 +182,7 @@ export default function AgendarCitaPage() {
                       ⚠️ {fechaError}
                     </small>
                   )}
-                  <small style={{ color: "#6c757d", fontSize: "0.75rem" }}>
+                  <small style={{ color: "#6c757d", fontSize: "0.75rem", display: "block" }}>
                     Solo lunes a sábado, próxima semana
                   </small>
                 </div>
@@ -240,7 +239,7 @@ export default function AgendarCitaPage() {
                       Primero selecciona una fecha
                     </p>
                   )}
-                  <small style={{ color: "#6c757d", fontSize: "0.75rem" }}>
+                  <small style={{ color: "#6c757d", fontSize: "0.75rem", display: "block" }}>
                     Horario: 10:00 AM a 7:00 PM
                   </small>
                 </div>
@@ -308,7 +307,7 @@ export default function AgendarCitaPage() {
               }}
             >
               <h5 style={{ marginBottom: "1.5rem", color: "#333" }}>
-                <i className="bi bi-list-check"></i> Mis Citas
+                📋 Mis Citas
               </h5>
 
               {citasCliente.length === 0 ? (

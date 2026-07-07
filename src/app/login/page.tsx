@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
+import { iniciarSesionUsuario } from "../../lib/firebase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,16 +15,15 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
-  // ✅ AGREGAR async AQUÍ
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setCargando(true);
 
-    // 1. Verificar si es el ADMINISTRADOR
+    // 1. Verificar si es el ADMINISTRADOR (mantenemos esto igual)
     if (email === "admin@confeccionescarmen.cl" && password === "admin123") {
       const adminData = {
-        id: "admin-001",
+        uid: "admin-001",
         nombre: "Administrador",
         apellido: "Sistema",
         correo: "admin@confeccionescarmen.cl",
@@ -36,17 +36,16 @@ export default function LoginPage() {
       return;
     }
 
-    // 2. Verificar si es un CLIENTE registrado
+    // 2. Usar Firebase Auth para clientes
     const resultado = await iniciarSesion(email, password);
     setCargando(false);
 
-    if (resultado) {
+    if (resultado.exito) {
       router.push("/?login=exitoso");
     } else {
-      setError("Credenciales incorrectas. Verifica tu correo y contraseña.");
+      setError(resultado.error || "Credenciales incorrectas");
     }
   };
-
 
   return (
     <div style={{
@@ -65,19 +64,12 @@ export default function LoginPage() {
         maxWidth: "420px",
         boxShadow: "0 8px 32px rgba(0,0,0,0.12)"
       }}>
-        {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <div style={{
-            width: "80px",
-            height: "80px",
-            borderRadius: "50%",
+            width: "80px", height: "80px", borderRadius: "50%",
             background: "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 1rem",
-            color: "white",
-            fontSize: "2rem"
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 1rem", color: "white", fontSize: "2rem"
           }}>
             🧵
           </div>
@@ -89,32 +81,18 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Mensaje de registro exitoso */}
-        {typeof window !== "undefined" && 
-         new URLSearchParams(window.location.search).get("registro") === "exitoso" && (
+        {error && (
           <div style={{
-            background: "#d4edda",
-            color: "#155724",
-            padding: "0.75rem",
-            borderRadius: "8px",
-            marginBottom: "1rem",
-            fontSize: "0.9rem",
-            textAlign: "center"
+            background: "#f8d7da", color: "#721c24", padding: "0.75rem",
+            borderRadius: "8px", marginBottom: "1rem", fontSize: "0.9rem", textAlign: "center"
           }}>
-            ✅ ¡Cuenta creada con éxito! Ahora inicia sesión
+            ❌ {error}
           </div>
         )}
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "1rem" }}>
-            <label style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              fontWeight: 600,
-              fontSize: "0.9rem",
-              color: "#495057"
-            }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 600, fontSize: "0.9rem", color: "#495057" }}>
               Correo electrónico
             </label>
             <input
@@ -124,27 +102,14 @@ export default function LoginPage() {
               placeholder="correo@ejemplo.cl"
               required
               style={{
-                width: "100%",
-                padding: "0.75rem",
-                border: "2px solid #dee2e6",
-                borderRadius: "8px",
-                fontSize: "0.95rem",
-                outline: "none",
-                transition: "border-color 0.2s"
+                width: "100%", padding: "0.75rem", border: "2px solid #dee2e6",
+                borderRadius: "8px", fontSize: "0.95rem", outline: "none"
               }}
-              onFocus={(e) => e.target.style.borderColor = "#2b7a2b"}
-              onBlur={(e) => e.target.style.borderColor = "#dee2e6"}
             />
           </div>
 
           <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              fontWeight: 600,
-              fontSize: "0.9rem",
-              color: "#495057"
-            }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 600, fontSize: "0.9rem", color: "#495057" }}>
               Contraseña
             </label>
             <input
@@ -154,76 +119,29 @@ export default function LoginPage() {
               placeholder="••••••••"
               required
               style={{
-                width: "100%",
-                padding: "0.75rem",
-                border: "2px solid #dee2e6",
-                borderRadius: "8px",
-                fontSize: "0.95rem",
-                outline: "none"
+                width: "100%", padding: "0.75rem", border: "2px solid #dee2e6",
+                borderRadius: "8px", fontSize: "0.95rem", outline: "none"
               }}
-              onFocus={(e) => e.target.style.borderColor = "#2b7a2b"}
-              onBlur={(e) => e.target.style.borderColor = "#dee2e6"}
             />
           </div>
-
-          {error && (
-            <div style={{
-              background: "#f8d7da",
-              color: "#721c24",
-              padding: "0.75rem",
-              borderRadius: "8px",
-              marginBottom: "1rem",
-              fontSize: "0.9rem",
-              textAlign: "center"
-            }}>
-              ❌ {error}
-            </div>
-          )}
 
           <button
             type="submit"
             disabled={cargando}
             style={{
-              width: "100%",
-              padding: "0.75rem",
-              background: cargando 
-                ? "#6c757d" 
-                : "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "1rem",
-              fontWeight: 600,
-              cursor: cargando ? "not-allowed" : "pointer",
-              transition: "opacity 0.2s"
-            }}
-            onMouseOver={(e) => {
-              if (!cargando) e.currentTarget.style.opacity = "0.9";
-            }}
-            onMouseOut={(e) => {
-              if (!cargando) e.currentTarget.style.opacity = "1";
+              width: "100%", padding: "0.75rem",
+              background: cargando ? "#6c757d" : "linear-gradient(135deg, #2b7a2b, #1e5e1e)",
+              color: "white", border: "none", borderRadius: "8px",
+              fontSize: "1rem", fontWeight: 600, cursor: cargando ? "not-allowed" : "pointer"
             }}
           >
             {cargando ? "Iniciando sesión..." : "Iniciar Sesión"}
           </button>
         </form>
 
-        {/* Enlace para crear cuenta */}
-        <p style={{
-          textAlign: "center",
-          marginTop: "1.5rem",
-          fontSize: "0.9rem",
-          color: "#6c757d"
-        }}>
+        <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.9rem", color: "#6c757d" }}>
           ¿No tienes cuenta?{" "}
-          <Link
-            href="/registro"
-            style={{
-              color: "#8B3A4A",
-              fontWeight: 600,
-              textDecoration: "none"
-            }}
-          >
+          <Link href="/registro" style={{ color: "#8B3A4A", fontWeight: 600, textDecoration: "none" }}>
             Crear Cuenta
           </Link>
         </p>
